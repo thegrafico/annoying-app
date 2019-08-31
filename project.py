@@ -12,7 +12,6 @@ class Project:
         self.name = name
         self.users = []
         self.task = []
-        self.user_task = {}
         self.user_in = ""
     #==========================================
     def add_user(self, user=None):
@@ -39,10 +38,21 @@ class Project:
         itask = int(input("Enter task number: "))
         if self.users[iuser-1] in self.users and self.task[itask-1] in self.task:
             self.users[iuser-1].add_task(self.task[itask-1])
-            # self.user_task[self.users[iuser-1]] = self.task[itask-1]
         else:
             print("user or task don't exits")
+    #==========================================        
+    def update_task(self, task=None):
+        self.show_task()
+        itask = int(input("Please, enter the number of the task: "))-1
+        ctast = input("Update message: ")
+        
+        if self.task[itask]:
 
+            for _user in self.users:
+                if self.task[itask] in _user.task:
+                    ind = _user.task.index(self.task[itask])
+                    _user.task[ind] = ctast
+            self.task[itask] = ctast
     #==========================================        
     def show_users(self):
         print("Users:")
@@ -65,18 +75,18 @@ class Project:
             print("There are not users")
     #==========================================                    
     def run(self):
-        self.options = {"1":self.add_user,"2":self.add_task,"3":self.set_task,"4":self.show_user_task,"5:":True}
+        self.options = {"1":self.add_user,"2":self.add_task,"3":self.set_task,"4":self.update_task,"5":self.show_user_task,"6:":True}
         print("\n================{}=================".format(self.name))
-        print("1.Add user\n2.Add_task\n3.Set task to user\n4.Show project data\n5.Exit")
+        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n5.Show project data\n6.Exit")
         print("=====================================\n")
         self.user_in = input("Select: ")
-        if self.user_in != '5':
+        if self.user_in != '6':
             self.options[self.user_in]()
 #== 
 if __name__ == "__main__":
     project = Project("CoRe")
 
-    while project.user_in != '5':
+    while project.user_in != '6':
         project.run()
     
     print("Bye")
