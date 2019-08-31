@@ -41,18 +41,32 @@ class Project:
         else:
             print("user or task don't exits")
     #==========================================        
-    def update_task(self, task=None):
+    def update_task(self):
+        self.edit_task("update", "Update message: ")
+
+    #==========================================                    
+    def remove_task(self):
+        self.edit_task("remove")
+    #==========================================                    
+
+    def edit_task(self, mode, msg=None):
         self.show_task()
         itask = int(input("Please, enter the number of the task: "))-1
-        ctast = input("Update message: ")
-        
-        if self.task[itask]:
+        if msg:
+            ctask = input(msg)  
+        try:
+            if self.task[itask]:
+                for _user in self.users:
+                    if self.task[itask] in _user.task:
+                        ind = _user.task.index(self.task[itask])
+                        if mode == "update":
+                            _user.task[ind] = ctask
+                        elif mode == "remove":
+                            del _user.task[ind]
 
-            for _user in self.users:
-                if self.task[itask] in _user.task:
-                    ind = _user.task.index(self.task[itask])
-                    _user.task[ind] = ctast
-            self.task[itask] = ctast
+                self.task[itask] = ctask
+        except:
+            print("Cannot find the task")
     #==========================================        
     def show_users(self):
         print("Users:")
@@ -75,18 +89,24 @@ class Project:
             print("There are not users")
     #==========================================                    
     def run(self):
-        self.options = {"1":self.add_user,"2":self.add_task,"3":self.set_task,"4":self.update_task,"5":self.show_user_task,"6:":True}
+        self.options = {"1":self.add_user,
+        "2":self.add_task,
+        "3":self.set_task,
+        "4":self.update_task,
+        "5":self.remove_task,
+        "6":self.show_user_task,
+        "7:":True}
         print("\n================{}=================".format(self.name))
-        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n5.Show project data\n6.Exit")
+        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n5.Remove task\n6.Show project data\n7.Exit")
         print("=====================================\n")
         self.user_in = input("Select: ")
-        if self.user_in != '6':
+        if self.user_in != '7':
             self.options[self.user_in]()
 #== 
 if __name__ == "__main__":
     project = Project("CoRe")
 
-    while project.user_in != '6':
+    while project.user_in != '7':
         project.run()
     
     print("Bye")
