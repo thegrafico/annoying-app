@@ -39,7 +39,7 @@ class User:
         Number: {}
         taks: {}
         """.format(self.name, self.email, self.number, ",".join(self.task))
-        print(info)  
+        return info 
     #==========================================                    
     def show_task(self):
         if len(self.task) > 0:
