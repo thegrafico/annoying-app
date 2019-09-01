@@ -19,8 +19,13 @@ class User:
         self.number = number
     #==========================================                        
     def add_task(self, task):
-        if task not in self.task:
-            self.task.append(task)
+        if type(task) == str:
+            if task not in self.task:
+                self.task.append(task)
+        elif type(task) == list:
+            for _ in task:
+                if task not in self.task:
+                    self.task.append(_)            
     #==========================================                    
     def show_user_info(self):
         if len(self.task) == 0:
