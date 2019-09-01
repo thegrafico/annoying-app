@@ -2,56 +2,66 @@ import sys
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
 import time
 
 #to use googlechrome
-browser = webdriver.Chrome("./chromedriver")
+browser = webdriver.Chrome("./engine/drivers/chromedriver")
+# browser.set_window_size(300, 500)
+browser.set_window_position(0, 0)
 
-browser.execute_script("window.open('','_blank');")
+
+
+# browser.execute_script("window.open('','_blank');")
 
 #open chrome and go to github
 browser.get("https://web.whatsapp.com/")
 
-# def create():
+time.sleep(10)
+
+def send_message(number, message):
     
-#     #creating the folder
-#     foldername = str(sys.argv[1])
-#     os.makedirs(projects_path + foldername)
-    
-#     #username
-#     py_btn = browser.find_elements_by_xpath("//*[@id='login_field']")[0]
-#     py_btn.send_keys("thegrafico")
+    #Person to send message
+    py_btn = browser.find_elements_by_xpath("//*[@id='side']/div[1]/div/label/input")[0]
+    py_btn.send_keys(number, Keys.ENTER)
 
-#     #password
-#     py_btn = browser.find_elements_by_xpath("//*[@id='password']")[0]
-#     py_btn.send_keys("Lana022107")
+    py_btn = browser.find_elements_by_xpath("//*[@id='main']/footer/div[1]/div[2]/div/div[2]")[0]
+    py_btn.send_keys(message, Keys.ENTER)
 
-#     #Click login
-#     py_btn = browser.find_elements_by_xpath("//*[@id='login']/form/div[3]/input[7]")[0]
-#     py_btn.click()
+    # #password
+    # py_btn = browser.find_elements_by_xpath("//*[@id='password']")[0]
+    # py_btn.send_keys("Lana022107")
 
-#     #go to create a new project
-#     browser.get("https://github.com/new")
+    # #Click login
+    # py_btn = browser.find_elements_by_xpath("//*[@id='login']/form/div[3]/input[7]")[0]
+    # py_btn.click()
 
-#     #given the name of the repo on github
-#     py_btn = browser.find_elements_by_xpath("//*[@id='repository_name']")[0]
-#     py_btn.send_keys(foldername)
+    # #go to create a new project
+    # browser.get("https://github.com/new")
 
-#     #if go so fast maybe occurs a problem, so, do sleet to wait 3 secons
-#     time.sleep(3)
+    # #given the name of the repo on github
+    # py_btn = browser.find_elements_by_xpath("//*[@id='repository_name']")[0]
+    # py_btn.send_keys(foldername)
 
-#     #click submit
-#     py_btn = browser.find_elements_by_xpath("//*[@id='new_repository']/div[3]/button")[0]
-#     py_btn.click()
+    # #if go so fast maybe occurs a problem, so, do sleet to wait 3 secons
+    # time.sleep(3)
 
-#     #exit browser
-#     browser.quit()
+    # #click submit
+    # py_btn = browser.find_elements_by_xpath("//*[@id='new_repository']/div[3]/button")[0]
+    # py_btn.click()
 
-x = input("Open tap: ")
-while x != '0':
+    # #exit browser
+    # browser.quit()
+
+
+send_message("9392321555", "automated message")
+# browser.set_window_size(0, 0)
+time.sleep(2)
+send_message("7874318538", "automated message")
+action = input("Open tap: ")
+
+while action != '0':
     browser.execute_script("window.open('','_blank');")
-    x = input("Select task: ")
+    action = input("Select task: ")
 
 print("Finish")
 # if __name__ == "__main__":
