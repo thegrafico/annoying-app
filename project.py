@@ -1,11 +1,10 @@
 """
 Raul Pichardo
 devpichardo@gmail.com
-
 App to project managments the project of the CoRe Lab
 """
 from user import User
-
+from send_email import sendEmail
 class Project:
     
     def __init__(self, name, description = ""):
@@ -140,6 +139,14 @@ class Project:
                 print("{} has the task: {}".format(_user.name, _user.show_task()) )
         else:
             print("There are not users")
+
+    def send_email_to_users(self, users_email= None):
+        if len(self.users) > 0:
+            for u in self.users:
+                if u.email:
+                    sendEmail(u.email, text_message=u.task_info())
+        else:
+            print("Users empty")
     #==========================================                    
     def run(self):
         self.options = {"1":self.add_user,
@@ -149,9 +156,10 @@ class Project:
         "5":self.remove_task,
         "6":self.show_user_task,
         "7":True,
-        "8":self.remove_user}
+        "8":self.remove_user,
+        "9":self.send_email_to_users}
         print("\n================{}=================".format(self.name))
-        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n5.Remove task\n6.Show project data\n7.Exit\n8.Remove user")
+        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n5.Remove task\n6.Show project data\n7.Exit\n8.Remove user\n9.Send remainder email")
         print("=====================================\n")
         self.user_in = input("Select: ")
         if self.user_in != '7':
@@ -161,15 +169,16 @@ class Project:
 if __name__ == "__main__":
 
     raul = User("Raul Pichardo", "raul022107@gmail.com", "7873776957")
-    noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538")
+    nicole = User("Nicole Santiago", "nicolesantiago0478@gmail.com", "9392321555")
 
     rtask = ["Create API", "Finish git", "Finish project"]
     ntask = ["Create gmail API", "Learn git"]
 
     project = Project("CoRe")
-    project.add_user([raul, noah])
+    project.add_user([raul, nicole])
     project.add_task([rtask, ntask])
     project.set_task(raul, rtask)
+    project.set_task(nicole, ntask)
 
     while project.user_in != '7':
         project.run()

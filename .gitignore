@@ -1,1 +1,4 @@
 todo.txt
+chromedriver
+__pycache__
+geckodriver*

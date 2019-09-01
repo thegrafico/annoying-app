@@ -26,7 +26,10 @@ class User:
             for _ in task:
                 if task not in self.task:
                     self.task.append(_)            
-    #==========================================                    
+    #==========================================     
+    def task_info(self):
+        return "{} has to completed the following task: {}".format(self.name, ", ".join(self.task))
+    #==========================================     
     def show_user_info(self):
         if len(self.task) == 0:
             self.task = "None"
