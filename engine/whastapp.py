@@ -16,7 +16,7 @@ browser.set_window_position(0, 0)
 #open chrome and go to github
 browser.get("https://web.whatsapp.com/")
 
-time.sleep(10)
+time.sleep(5)
 
 def send_message(number, message):
     try:

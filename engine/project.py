@@ -3,7 +3,6 @@ Raul Pichardo
 devpichardo@gmail.com
 App to project managments the project of the CoRe Lab
 """
-import whastapp as ws
 from user import User
 from send_email import sendEmail
 class Project:
@@ -149,33 +148,110 @@ class Project:
         else:
             print("Users empty")
     
+    #==========================================
+    def add_number(self):
+       self.add_user_date("number")
+
+    def add_user_email(self, user=None):
+        self.add_user_date("email")
+    
+    #==========================================
+    def add_user_date(self, method, user=None):
+        self.show_users()
+        try:
+            if not user:
+                iuser = int (input("Select user: ")) - 1
+                user = self.users[iuser]
+            if user in self.users:
+                data = input("Enter the {}: ".format(method))
+                if method == "number":
+                    user.number = data
+                elif method == "email":
+                    user.email = data
+            else:
+                print("Invalid user")
+        except:
+            print("Cannot find the user")
+    #==========================================
     def send_ws_message(self):
+        import whastapp as ws
         for u in self.users:
             ws.send_message(u.number, u.show_user_info())
+    #==========================================
+    def administrate_user(self):
+        print(
+            """
+            1. Add user
+            2. Remove user 
+            3. Add user number
+            4. Add user email
+            5. Show users
+            """)
+        ifunc = input("Select: ")
+        option = {
+        "1":self.add_user,
+        "2":self.remove_user,
+        "3":self.add_number,
+        "4":self.add_user_email,
+        "5":self.show_users
+        }
+        try:
+            option[ifunc]()
+        except:
+            print("Invalid option")
+    #==========================================                    
+    def administrate_task(self):
+        print(
+            """
+            1. Add task
+            2. Edit task
+            3. Remove task
+            4. Show Task
+            """)
+        ifunc = input("Select: ")
+        option = {
+        "1":self.add_task,
+        "2":self.edit_task,
+        "3":self.remove_task,
+        "4":self.show_task
+        }
+        try:
+            option[ifunc]()
+        except:
+            print("Invalid option")
     #==========================================                    
     def run(self):
-        self.options = {"1":self.add_user,
-        "2":self.add_task,
+        self.options = {
+        "1":self.administrate_user,
+        "2":self.administrate_task,
         "3":self.set_task,
-        "4":self.update_task,
-        "5":self.remove_task,
-        "6":self.show_user_task,
-        "7":True,
-        "8":self.remove_user,
-        "9":self.send_email_to_users,
-        "10":self.send_ws_message}
+        "4":self.show_user_task,
+        "5":self.send_email_to_users,
+        "6":self.send_ws_message,
+        "7":True
+        }
         print("\n================{}=================".format(self.name))
-        print("1.Add user\n2.Add task\n3.Set task to user\n4.Update task\n\
-        5.Remove task\n6.Show project data\n7.Exit\n8.Remove user\n9.Send remainder email\n10.send whastapp message")
+        print("""
+        1. Administrate Users
+        2. Administrate Task
+        3. Set task to user
+        4. Show project info
+        5. Send remainder email
+        6. Send whastapp message
+        7. Exit
+        """)
         print("=====================================\n")
         self.user_in = input("Select: ")
-        if self.user_in != '7':
-            self.options[self.user_in]()
+        if self.user_in != str(len(self.options)):
+            try:
+                self.options[self.user_in]()
+            except:
+                print("Option not available")
     #==========================================     
 #== 
 if __name__ == "__main__":
 
-    raul = User("Raul Pichardo", "raul022107@gmail.com", "7875948116")
+    raul = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308")
     noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538")
 
     rtask = ["Create API", "Finish git", "Finish project"]
