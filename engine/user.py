@@ -33,12 +33,8 @@ class User:
     def show_user_info(self):
         if len(self.task) == 0:
             self.task = "None"
-        info = """
-        Name: {}
-        Email: {}
-        Number: {}
-        taks: {}
-        """.format(self.name, self.email, self.number, ",".join(self.task))
+        info = """Name: {}, taks: {}
+        """.format(self.name,  ",".join(self.task))
         return info 
     #==========================================                    
     def show_task(self):

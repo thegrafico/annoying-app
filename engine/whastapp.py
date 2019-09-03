@@ -4,21 +4,24 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 
-print("Init whastapp")
+browser = None
+def init():
+    print("Init whastapp")
+    global browser
+    #to use googlechrome
+    browser = webdriver.Chrome("./engine/drivers/chromedriver")
+    # browser.set_window_size(300, 500)
+    browser.set_window_position(0, 0)
 
-#to use googlechrome
-browser = webdriver.Chrome("./engine/drivers/chromedriver")
-# browser.set_window_size(300, 500)
-browser.set_window_position(0, 0)
+    # browser.execute_script("window.open('','_blank');")
 
-# browser.execute_script("window.open('','_blank');")
+    #open chrome and go to github
+    browser.get("https://web.whatsapp.com/")
 
-#open chrome and go to github
-browser.get("https://web.whatsapp.com/")
-
-time.sleep(5)
+    time.sleep(5)
 
 def send_message(number, message):
+    global browser
     try:
         #Person to send message
         py_btn = browser.find_elements_by_xpath("//*[@id='side']/div[1]/div/label/input")[0]

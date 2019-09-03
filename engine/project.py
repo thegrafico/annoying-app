@@ -4,6 +4,8 @@ devpichardo@gmail.com
 App to project managments the project of the CoRe Lab
 """
 from user import User
+import whastapp as ws
+
 from send_email import sendEmail
 class Project:
     
@@ -13,6 +15,7 @@ class Project:
         self.task = []
         self.user_in = ""
         self.project_desc = description
+        self.run_once = True
     #==========================================
     def add_user(self, user=None):
         if not user:
@@ -174,9 +177,29 @@ class Project:
             print("Cannot find the user")
     #==========================================
     def send_ws_message(self):
-        import whastapp as ws
-        for u in self.users:
-            ws.send_message(u.number, u.show_user_info())
+        print(
+            """
+            1. Send message to all users
+            2. Send message to one user
+            """)
+        ifunc = input("Select: ")
+        self.show_users()
+
+        if self.run_once:
+            ws.init()
+            self.run_once = False
+
+
+        if ifunc == "2":
+            iuser = int(input("Select user: ")) - 1
+            try:
+                user = self.users[iuser]
+                ws.send_message(user.number, user.show_user_info())
+            except:
+                print("Invalid user")
+        else:
+            for u in self.users:
+                ws.send_message(u.number, u.show_user_info())
     #==========================================
     def administrate_user(self):
         print(
@@ -251,17 +274,17 @@ class Project:
 #== 
 if __name__ == "__main__":
 
-    raul = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308")
-    noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538")
+    # raul = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308")
+    # noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538")
 
     rtask = ["Create API", "Finish git", "Finish project"]
     ntask = ["Create gmail API", "Learn git"]
 
     project = Project("CoRe")
-    project.add_user([raul, noah])
+    # project.add_user([raul, noah])
     project.add_task([rtask, ntask])
-    project.set_task(raul, rtask)
-    project.set_task(noah, ntask)
+    # project.set_task(raul, rtask)
+    # project.set_task(noah, ntask)
 
     while project.user_in != '7':
         project.run()
