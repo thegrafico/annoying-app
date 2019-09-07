@@ -9,7 +9,8 @@ import whastapp as ws
 from send_email import sendEmail
 class Project:
     
-    def __init__(self, name, description = ""):
+    def __init__(self, owner, name, description = ""):
+        self.owner = owner
         self.name = name
         self.users = []
         self.task = []
@@ -28,7 +29,6 @@ class Project:
             self.users.append(user)
 
         self.show_users()
-
     #==
     def remove_user(self, user_id=None):
         if len(self.users)>0:
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     rtask = ["Create API", "Finish git", "Finish project"]
     ntask = ["Create gmail API", "Learn git"]
 
-    project = Project("CoRe")
+    project = Project("Raul Pichardo", "CoRe")
     # project.add_user([raul, noah])
     project.add_task([rtask, ntask])
     # project.set_task(raul, rtask)

@@ -34,21 +34,48 @@ def main(path_db):
  
     sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS projects (
                                         id integer PRIMARY KEY,
-                                        name text NOT NULL,
-                                        begin_date text,
-                                        end_date text
+                                        userid integer,
+                                        project_name text NOT NULL,
+                                        description text,
+                                        FOREIGN KEY (userid) REFERENCES user (id) ON DELETE CASCADE
                                     ); """
-    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS tasks (
+    sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS task (
                                     id integer PRIMARY KEY,
-                                    name text NOT NULL,
+                                    description text NOT NULL,
                                     priority integer,
-                                    status_id integer NOT NULL,
                                     project_id integer NOT NULL,
-                                    begin_date text NOT NULL,
-                                    end_date text NOT NULL,
-                                    FOREIGN KEY (project_id) REFERENCES projects (id)
+                                    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
                                 );"""
- 
+
+    sql_create_users_table = """CREATE TABLE IF NOT EXISTS user (
+                                id integer PRIMARY KEY,
+                                name text NOT NULL,
+                                email text NOT NULL,
+                                number text NOT NULL
+                                );""" 
+    sql_create_task_user_table = """CREATE TABLE IF NOT EXISTS TASK_USER (
+                                userid integer,
+                                taskid integer,
+                                status_id integer NOT NULL,
+                                begin_date text NOT NULL,
+                                end_date text NOT NULL,
+                                FOREIGN KEY (userid) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
+                                FOREIGN KEY (taskid) REFERENCES task (id) ON DELETE CASCADE ON UPDATE CASCADE
+                                );"""
+
+    sql_create_project_user_table = """CREATE TABLE IF NOT EXISTS PROJECT_USER (
+                                userid integer,
+                                projectid integer,
+                                FOREIGN KEY (userid) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
+                                FOREIGN KEY (projectid) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
+                                );"""
+
+    sql_create_project_task_table = """CREATE TABLE IF NOT EXISTS PROJECT_TASK (
+                            taskid integer,
+                            projectid integer,
+                            FOREIGN KEY (taskid) REFERENCES task (id) ON DELETE CASCADE ON UPDATE CASCADE,
+                            FOREIGN KEY (projectid) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
+                            );"""
     # create a database connection
     conn = create_connection(database)
  
@@ -59,6 +86,20 @@ def main(path_db):
  
         # create tasks table
         create_table(conn, sql_create_tasks_table)
+
+        # create users table
+        create_table(conn, sql_create_users_table)
+        
+        # create task_user table
+        create_table(conn, sql_create_task_user_table)
+        
+        # create project-users tables
+        create_table(conn, sql_create_project_user_table)
+        
+        # create project-task tables
+        create_table(conn, sql_create_project_task_table)
+
+
     else:
         print("Error! cannot create the database connection.")
 
