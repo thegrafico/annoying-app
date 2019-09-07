@@ -81,14 +81,15 @@ def main(path_db):
  
     # create tables
     if conn is not None:
+
+        # create users table
+        create_table(conn, sql_create_users_table)
+
         # create projects table
         create_table(conn, sql_create_projects_table)
  
         # create tasks table
         create_table(conn, sql_create_tasks_table)
-
-        # create users table
-        create_table(conn, sql_create_users_table)
         
         # create task_user table
         create_table(conn, sql_create_task_user_table)
