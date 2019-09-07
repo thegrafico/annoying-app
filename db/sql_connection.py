@@ -29,9 +29,8 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 #==================================================
-def main(path_db):
-    database = r"{}".format(path_db)
- 
+def main(conn):
+    #PROJECT table
     sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS projects (
                                         id integer PRIMARY KEY,
                                         userid integer,
@@ -39,6 +38,7 @@ def main(path_db):
                                         description text,
                                         FOREIGN KEY (userid) REFERENCES user (id) ON DELETE CASCADE
                                     ); """
+    #TASK table
     sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS task (
                                     id integer PRIMARY KEY,
                                     description text NOT NULL,
@@ -47,12 +47,14 @@ def main(path_db):
                                     FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
                                 );"""
 
+    #USERS TABLE
     sql_create_users_table = """CREATE TABLE IF NOT EXISTS user (
                                 id integer PRIMARY KEY,
                                 name text NOT NULL,
-                                email text NOT NULL,
+                                email text NOT NULL UNIQUE,
                                 number text NOT NULL
                                 );""" 
+    #task users
     sql_create_task_user_table = """CREATE TABLE IF NOT EXISTS TASK_USER (
                                 userid integer,
                                 taskid integer,
@@ -76,9 +78,7 @@ def main(path_db):
                             FOREIGN KEY (taskid) REFERENCES task (id) ON DELETE CASCADE ON UPDATE CASCADE,
                             FOREIGN KEY (projectid) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
                             );"""
-    # create a database connection
-    conn = create_connection(database)
- 
+
     # create tables
     if conn is not None:
 
@@ -99,11 +99,46 @@ def main(path_db):
         
         # create project-task tables
         create_table(conn, sql_create_project_task_table)
-
-
     else:
         print("Error! cannot create the database connection.")
 
+
+def create_user(conn, user):
+    """
+    Create a new task
+    :conn: connection to database
+    :user project: tuple of element
+    :return: id inserted
+    """
+ 
+    sql = '''INSERT INTO user (id, name, email, number) VALUES(?,?,?,?);'''
+    cur = conn.cursor()
+    cur.execute(sql, user)
+    return cur.lastrowid
+
+def get_table(conn, table):
+    
+    cur = conn.cursor()
+    
+    cur.execute("SELECT * FROM {}".format(table))
+ 
+    rows = cur.fetchall()
+ 
+    for row in rows:
+        print(row)
 #==run
 if __name__ == '__main__':
-    main(r"./pythonsqlite.db")
+
+    tables = ['user', 'projects', 'task', 'TASK_USER', 'PROJECT_USER', 'PROJECT_TASK']
+    
+    raul = [None, "Raul Pichardo", "raul022107@gmail.com","7873776957"]
+    
+    conn = create_connection("./pythonsqlite.db")
+    
+    main(conn)    
+    
+    owner_id = create_user(conn, raul)
+ 
+    get_table(conn, "user")
+
+    conn.commit()
