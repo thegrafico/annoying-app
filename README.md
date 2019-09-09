@@ -4,7 +4,7 @@ Application to control project management. We can create projects, In each proje
 
 This application has the CRUD system, so we can create, read, update and delete any project that is created and we also can do the same with task or users that are added to any project.
 
-This application uses MySQlite for data persistence.
+This application uses SQlite for data persistence.
 
 ## functionalities
 
@@ -29,10 +29,18 @@ To do so, we have to setup a sender email in the aplicaction (Only Gmail works) 
 
     Step:
     - Create a new email (Gmail)
-    - Go to configuration and allow less secure apps [Click Here](https://support.google.com/accounts/answer/6010255?hl=en)
+    - Go to configuration and allow less secure apps
     - Add credentials in the application
 
-When you complete the step above you are done to send email to any user with any email. 
+To configure Gmail less secure app [Click Here](https://support.google.com/accounts/answer/6010255?hl=en)
+
+When you complete the step above you are done to send email to any user with any email.
+
+### How to send emails to users in a project
+For now, this options only work with google chrome.
+
+When you select this option, google chrome will open a new task to scan your WhatsApp user, when you scan the tag, you are set
+to send any automated message through the main application. DO NOT CLOSE THIS NEW TAG, if you do so, you will have to start the same process of scan the tag, but if you keep the task open, you can send any message in any time
 
 ### Prerequisites
 
@@ -53,7 +61,7 @@ python3 engine/project.py
 
 ## Authors
 
-* **Raul Pichardo Avalo** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Raul Pichardo Avalo, Computer Enginner Student with a minor in Computer Science** 
 
 ## License
 
