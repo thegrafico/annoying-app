@@ -2,7 +2,7 @@
 
 Application to control project management. We can create projects, In each project we can add users, assign tasks, etc.
 
-This application has the CRUD system, so we can create, read, update and delete any project that is created and we also can do the same with task or users that are added to any project.
+This application uses the CRUD system, so we can create, read, update and delete any project that is created and we also can do the same with task or users that are added to any project.
 
 This application uses SQlite for data persistence.
 
@@ -16,7 +16,8 @@ This application uses SQlite for data persistence.
 
     -Give time to complete the task
 
-    -If the program if running, an automated message will be send to all users in the project at specific time every 2 days (Owner of the project can change this time)
+    -If the program if running, an automated message will be send to all users in the project
+    at specific time every 2 days (Owner of the project can change this time)
 
     -Send email to all users with their task and date-limit 
 
