@@ -4,7 +4,6 @@ devpichardo@gmail.com
 
 User class to give projects
 """
-
 class User:
     def __init__(self,name, email = None, number=None):
         self.name = name

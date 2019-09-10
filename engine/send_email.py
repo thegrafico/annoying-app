@@ -5,15 +5,20 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+try:
+    import credentials
+except:
+    print("Credentials.py not found")
+
 print("Program was init")
 
 #Send mail function
 def sendEmail(emails, subject = "automated-BOT-remainder",text_message="Bot ramainder message"):
 
     smtp_server = "smtp.gmail.com"
-    sender_email = "devpichardo@gmail.com"
+    sender_email = credentials.email
+    password = credentials.password
     receiver_email = emails
-    password = "Lana02210712RN"
 
     message = MIMEMultipart()
     message["Subject"] = "multipart test"

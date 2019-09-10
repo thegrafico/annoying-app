@@ -37,7 +37,7 @@ To configure Gmail less secure app [Click Here](https://support.google.com/accou
 
 When you complete the step above you are done to send email to any user with any email.
 
-### How to send emails to users in a project
+### How to send whastapp message to users in a project
 For now, this options only work with google chrome.
 
 When you select this option, google chrome will open a new task to scan your WhatsApp user, when you scan the tag, you are set

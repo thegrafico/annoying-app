@@ -29,7 +29,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 #==================================================
-def main(conn):
+def init_db(conn):
     #PROJECT table
     sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS projects (
                                         id integer PRIMARY KEY,
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     
     conn = create_connection("./pythonsqlite.db")
     
-    main(conn)    
+    init_db(conn)    
     
     owner_id = create_user(conn, raul)
  
