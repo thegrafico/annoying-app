@@ -104,7 +104,7 @@ def init_db(conn):
         print("Error! cannot create the database connection.")
 
 
-def create_user(conn, user):
+def insert_user(conn, user):
     """
     Create a new task
     :conn: connection to database
@@ -117,6 +117,7 @@ def create_user(conn, user):
     cur.execute(sql, user)
 
     conn.commit()
+
     return cur.lastrowid
 
 def get_table(conn, table):
@@ -129,6 +130,21 @@ def get_table(conn, table):
  
     for row in rows:
         print(row)
+
+def get_project_data(conn, userid):
+    
+    query = """SELECT * FROM projects WHERE userid = ? """
+    
+    cur = conn.cursor()
+    try:
+        cur.execute(query, int(userid))
+
+        data = cur.fetchall()
+    except:
+        print("Data cannot be found")
+
+    
+    return data
 #==run
 if __name__ == '__main__':
 
@@ -140,7 +156,7 @@ if __name__ == '__main__':
     
     init_db(conn)    
     
-    owner_id = create_user(conn, raul)
+    owner_id = insert_user(conn, raul)
  
     get_table(conn, "user")
 

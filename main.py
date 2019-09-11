@@ -47,8 +47,14 @@ def create_user(conn):
         number = validation.validate_number(number)
 
     user = (None,name, email, number)
-    sql.create_user(conn, user)
-    
+    userid = sql.insert_user(conn, user)
+
+    print("The user {}, with the ID: {}, has been created.\nUse your email to login".format(name, userid))
+
+
+def open_project(conn, userid = None):
+    return sql.get_project_data(conn, userid)
+
 #==Init the program
 if __name__ == "__main__": 
 
@@ -58,10 +64,9 @@ if __name__ == "__main__":
     sql.init_db(conn)       
     
     print("""
-        1. Start a new project
-        2. Continue with a project
-        3. Create a user
-        4. Exit""")
+        1. Create an user
+        2. Login
+        3. Exit""")
    
     # user_option = get_input()
 
@@ -70,7 +75,7 @@ if __name__ == "__main__":
     # print(user_option)
     # option[user_option](conn)
 
-    sql.get_table(conn, 'user')
+    sql.insert_user(conn, 'user')
 
     
 

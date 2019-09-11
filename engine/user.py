@@ -4,11 +4,15 @@ devpichardo@gmail.com
 
 User class to give projects
 """
+
+import validation
+
+
 class User:
     def __init__(self,name, email = None, number=None):
         self.name = name
-        self.email = email if email else "None"
-        self.number = number if number else "None"
+        self.email = self.validate_email(email) if email else "None"
+        self.number = self.validate_email(number) if number else "None"
         self.task = []
     #==========================================                        
     def set_email(self, email):
@@ -40,3 +44,20 @@ class User:
         if len(self.task) > 0:
             return ", ".join(self.task)
         return "None"
+    #==========================================                    
+    def validate_email(self, email):
+        email = validation.validate_email(email)
+        while not email:
+            print("Invalid email, enter again")
+            email = input("Email: ")
+            email = validation.validate_email(email)
+        return email
+    #==========================================                    
+    def validate_number(self, number):
+        print("The number can have the following formats:\n {},{}".format("###.###.####", "##########"))
+        number = validation.validate_number(number)
+        while not number:        
+            print("Invalid number, enter again")
+            number = input("Number: ") 
+            number = validation.validate_number(number)
+        return number
