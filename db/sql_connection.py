@@ -5,9 +5,10 @@ Connect python to slqlite
 import sqlite3
 from sqlite3 import Error
  
- 
+
 def create_connection(db_file):
     """ create a database connection to a SQLite database """
+    print("Connecting to the database")
     conn = None
     try:
         conn = sqlite3.connect(db_file)
@@ -114,6 +115,8 @@ def create_user(conn, user):
     sql = '''INSERT INTO user (id, name, email, number) VALUES(?,?,?,?);'''
     cur = conn.cursor()
     cur.execute(sql, user)
+
+    conn.commit()
     return cur.lastrowid
 
 def get_table(conn, table):
