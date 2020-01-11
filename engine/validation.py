@@ -6,16 +6,19 @@ def validate_number(number):
         return x + y + z
     return False
 
-def validate_email(email):
-    result = re.findall(r'^[a-zA-Z]\S+@\S+\.\S+',email)
-    return result[0] if result else False
+def validate_email(email:str)->bool:
+    if len(email) < 3: 
+        return False
+    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
 
-def validate_name(name):
+    return True if re.search(regex,email) else False
+    
+def validate_name(name:str) ->bool:
     """
     :param name: name of the user
     return true if find a digit, otherwise return false
     """
-    print(len(name))
+    # print(len(name))
     if len(name) > 3:
         result = any(char.isdigit() for char in name)
         return name if not result else False

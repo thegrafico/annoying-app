@@ -13,7 +13,7 @@ except:
 print("Program was init")
 
 #Send mail function
-def sendEmail(emails, subject = "automated-BOT-remainder",text_message="Bot ramainder message"):
+def sendEmail(emails, subject:str = "automated-BOT-remainder", text_message:str="Bot ramainder message"):
 
     smtp_server = "smtp.gmail.com"
     sender_email = credentials.email

@@ -9,7 +9,7 @@ import whastapp as ws
 from send_email import sendEmail
 class Project:
     
-    def __init__(self, owner, name, description = ""):
+    def __init__(self, userId, name, description = ""):
         self.owner = owner
         self.name = name
         self.users = []

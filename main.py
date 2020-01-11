@@ -61,21 +61,26 @@ if __name__ == "__main__":
     tables = ['user', 'projects', 'task', 'TASK_USER', 'PROJECT_USER', 'PROJECT_TASK']
 
     conn = sql.create_connection('./db/project_data.db')
-    sql.init_db(conn)       
+    
+    if not conn:
+        print("Can not connect to the database")
+        exit()
+        
+    sql.init_db(conn)   
     
     print("""
         1. Create an user
         2. Login
         3. Exit""")
    
-    # user_option = get_input()
+    user_option = get_input()
 
-    # option = {"1": True, "2": True, "3": create_user, "4":True}
+    option = {"1": True, "2": True, "3": create_user, "4":True}
 
-    # print(user_option)
-    # option[user_option](conn)
+    print(user_option)
+    option[user_option](conn)
 
-    sql.insert_user(conn, 'user')
+    # sql.insert_user(conn, 'user')
 
     
 

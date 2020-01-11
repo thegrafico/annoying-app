@@ -3,15 +3,16 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
+import random
 
 browser = None
 def init():
     print("Init whastapp")
     global browser
     #to use googlechrome
-    browser = webdriver.Chrome("./engine/drivers/chromedriver")
+    browser = webdriver.Chrome("./engine/driver/chromedriver.exe")
     # browser.set_window_size(300, 500)
-    browser.set_window_position(0, 0)
+    # browser.set_window_position(0, 0)
 
     # browser.execute_script("window.open('','_blank');")
 
@@ -35,6 +36,17 @@ def send_message(number, message):
 
 
 if __name__ == "__main__": 
-    send_message("9392321555", "automated message")
-    browser.set_window_size(0, 0)
-    send_message("7874318538", "automated message")
+    init()
+    msg = ["Buenos dias mamasota", "Hola Ma, ahora me levante, voy a seguir durmiendo", "Durmiendo", "Bueeenaaaas"]
+    nran = random.randint(0, len(msg)-1)
+    send_message("9392752555", msg[nran])
+    
+    userInp = int (input("press 0 to exit"))
+    
+    while userInp != 0:
+        nran = random.randint(0, len(msg)-1)
+        send_message("9392752555", msg[nran])
+        userInp = int (input("press 0 to exit"))
+        
+        
+    # browser.set_window_size(0, 0)
