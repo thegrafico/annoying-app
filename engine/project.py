@@ -3,255 +3,272 @@ Raul Pichardo
 devpichardo@gmail.com
 App to project managments the project of the CoRe Lab
 """
-from user import User
-import whastapp as ws
 
+# TODO: improve task for users
+
+import whastapp as ws
 from send_email import sendEmail
+from task import Task
+from user import User
+
+
 class Project:
-    
-    def __init__(self, userId, name, description = ""):
-        self.owner = owner
+    tasks: [Task]
+    owner: User
+    workers: [User]
+    project_id: int
+
+    def __init__(self, name: str, user_id: int, project_id: int, description=""):
+        # self.owner = owner
         self.name = name
-        self.users = []
-        self.task = []
         self.user_in = ""
         self.project_desc = description
         self.run_once = True
-    #==========================================
-    def add_user(self, user=None):
-        if not user:
-            user = input("Enter user: ")
-            user = User(user)
-        if type(user) == list:
-            for u in user:
-                self.users.append(u)
+        self.workers = []
+        self.project_id = project_id
+        self.tasks = []
+
+    # ==========================================
+    def add_user(self, user: User):
+        """Add just one user"""
+
+        if len(self.workers) > 0:
+            users_id = [temp.user_id for temp in self.workers]
         else:
-            self.users.append(user)
+            users_id = []
+
+        if user.user_id not in users_id:
+            self.workers.append(user)
+            users_id.append(user.user_id)
+        else:
+            self.workers.append(user)
 
         self.show_users()
-    #==
-    def remove_user(self, user_id=None):
-        if len(self.users)>0:
-            self.show_users()
-            if not user_id:
-                user_id = int(input("Enter user id: ")) - 1
-            
-            try:
-                if self.users[user_id] in self.users:
-                    print("User {} deleted".format(self.users[user_id].name))
-                    del self.users[user_id]
-                else:
-                    print("Cannot find the user")
-            except:
-                print("User don't exits")
-        else:
-            print("Not users")
-    #==========================================      
-    def set_task(self, user = None, task = None):
-        if len(self.users) > 0:
-            self.show_users()
-            self.show_task()
-            if not user or not task:
-                iuser = int(input("Enter user number: "))
-                itask = int(input("Enter task number: "))
-                if self.users[iuser-1] in self.users and self.task[itask-1] in self.task:
-                    self.users[iuser-1].add_task(self.task[itask-1])
-                    print("Added task to user")
-                else:
-                    print("user or task don't exits")
-            else:
-                print("User {}, task to add: {}".format(user.name, task))
-                if user in self.users:
-                    user.add_task(task)
-                    print("Added user and task")
-        else:
-            print("Empty task or users")
-    #=================CRUD SYSTEM=========================
-    def add_task(self, task=None):
+    # ==
 
-        if not task:
-            task = input("Enter task: ")
+    def remove_user_by_id(self, user_id: int):
+        """
+        Remove user by id
+        param: user_id -> id of the user to remove
+        """
+        if not len(self.workers):
+            return
 
-        if type(task) == str:
-            if task not in self.task:
-                if len(task) > 4:
-                    self.task.append(task)
-                else:
-                    print("Describe more the task")
-        elif type(task) == list:
-            for t in task:
-                for n in t:
-                    if n not in self.task and len(n) > 4:
-                        self.task.append(n)
-                    else:
-                        print("Describe task more")
+        # get all user ids
+        all_user_ids = [u.user_id for u in self.workers]
 
-        self.show_task()
-    #==
-    def update_task(self):
-        self.edit_task("update", "Update message: ")
-    #==
-    def remove_task(self):
-        self.edit_task("remove")
-    #==
-    def edit_task(self, mode, msg=None):
-        if len(self.task) > 0:
-            self.show_task()
-            itask = int(input("Please, enter the number of the task: "))-1
-            if msg:
-                ctask = input(msg)  
-            try:
-                if self.task[itask]:
-                    for _user in self.users:
-                        if self.task[itask] in _user.task:
-                            ind = _user.task.index(self.task[itask])
-                            if mode == "update":
-                                _user.task[ind] = ctask
-                            elif mode == "remove":
-                                del _user.task[ind]
-                    self.task[itask] = ctask
-            except:
-                print("Cannot find the task")
+        # verify if user exits
+        if user_id not in all_user_ids:
+            return
+
+        for elem, i in enumerate(self.workers):
+            if user_id == elem.user_id:
+                del self.workers[i]
+                return
+
+    # ==
+
+    # ==========================================
+    def set_task(self, user_id: int, task_id: int) -> bool:
+        """
+        Assign task to users. Task have to be created
+        param: userid ->Id of the user to assign task
+        task: task object to assign to user
+        return: True if a least one task was added
+        """
+        # if not len(task):  # task is empty?
+        #     print("Task is empty")
+        #     return False
+        # elif not len(self.workers):  # workers is empty??
+        #     print("Not user to add task")
+        #     return False
+
+        # all unique id of user in the project
+        allWorkersId = [u.user_id for u in self.workers]
+        all_task_id = [t.task_id for t in self.tasks]
+
+        # Verify user_id and verify if this id is for one of the workers in the project
+        # TODO: verify is task exits
+        if user_id < 1 or user_id not in allWorkersId or task_id not in all_task_id:
+            print("User id not belong to anyone in the project")
+            return False
+
+        for i in range(len(self.tasks)):
+            if task_id == self.tasks[i].task_id:
+                # self.task_info()
+                self.tasks[i].users.append(user_id)
+                # print(self.tasks[i].users)
+                print("THE TASK WITH THE ID: {}, WAS ASSIGNED TO THE USER WITH THE ID: {}".format(
+                    self.tasks[i].task_id, user_id))
+                # self.task_info()
+
+                return True
+
+        return False
+
+    # =================CRUD SYSTEM=========================
+    def add_task(self, task: [Task]) -> bool:
+        """Adding task"""
+
+        wasAdded = False
+
+        # is task is empty
+        if not len(task):
+            return wasAdded
+
+        if not len(self.tasks):
+            allTaskId = []
         else:
-            print("Task empty")
-    #==========================================        
+            allTaskId = [t.task_id for t in self.tasks]
+
+        for t in task:
+            if t.task_id not in allTaskId:
+                t.project_id = self.project_id
+                self.tasks.append(t)
+                allTaskId.append(t.task_id)
+                wasAdded = True
+        return wasAdded
+    # ==
+    def remove_task(self, task_id: int):
+        pass
+
+    # ==
+    def edit_task(self, task_id: int, new_values: {}):
+        """
+        Edit a task
+        task_id: id of the task to edit
+        new_values: dictionary of values {"owner":int, "status":Status, "description":str, "priority":int}
+        not all values are needed.
+        """
+
+        if not len(new_values) or task_id < 1:
+            return
+
+        all_task_id = [t.task_id for t in self.tasks]
+
+        if task_id not in all_task_id:
+            return
+
+        # find task to edit
+        task_to_edit: Task = list(filter(lambda t: task_id == t.task_id, self.tasks))[0]
+
+        # Edit the task
+        task_to_edit.edit(new_values)
+
+    # ==========================================
     def show_users(self):
-        if len(self.users) > 0:
+        if len(self.workers) > 0:
             print("*************************")
             print("Users:")
-            for n, user in enumerate(self.users, start=1):
+            for n, user in enumerate(self.workers, start=1):
                 print("{}. {}".format(n, user.name))
             print("*************************")
         else:
             print("Not users")
-    #==========================================        
-    def show_task(self):
-        if len(self.users) > 0:
-            print("*************************")
-            print("Task:")
-            for n,task in enumerate(self.task, start=1):
-                print("{}. {}".format(n, task))
-            print("*************************")
-        else:
-            print("Not task")
-    #==========================================
-    def show_user_task(self):
-        if len(self.users)> 0:
-            print("User taks:")
-            for _user in self.users:
-                print("{} has the task: {}".format(_user.name, _user.show_task()) )
-        else:
-            print("There are not users")
-    #==========================================
-    def send_email_to_users(self, users_email= None):
-        if len(self.users) > 0:
-            for u in self.users:
-                if u.email:
-                    sendEmail(u.email, text_message=u.task_info())
-        else:
-            print("Users empty")
-    
-    #==========================================
-    def add_number(self):
-       self.add_user_date("number")
 
-    def add_user_email(self, user=None):
-        self.add_user_date("email")
-    
-    #==========================================
-    def add_user_date(self, method, user=None):
+    # ==========================================
+    def task_info(self):
+        """Show all task in the project"""
+
+        if not len(self.tasks):  # task is empty??
+            print("Not tasks")
+            return
+        print("*************************")
+        print("Task:")
+        for task in self.tasks:
+            msg = "Location: {}, ID: {}, creator_id: {}, Description: {}, "
+            print(msg.format(task, task.task_id, task.creator_id, task.description), end="")
+            print("Assigned task: ", task.users)
+        print("*************************")
+
+    # ==
+    def get_task_by_user(self, user_id: int) -> [Task]:
+        """Return all task assigned to a user using the user_id"""
+
+        # Verify is task is empty
+        if not len(self.tasks):
+            return []
+
+        # filter by userid
+        return list(filter(lambda temp: (user_id in temp.assigned_ids), self.tasks))
+
+    # ==
+    def remove_user_from_task(self, task_id: int, user_id: int):
+        """ Remove a task by user id """
+
+        if not len(self.workers) or not len(self.tasks):
+            return
+
+        # all tasks id and user id
+        all_task_id = [t.task_id for t in self.tasks]
+        all_user_id = [u.user_id for u in self.workers]
+
+        # verify is exist
+        if task_id not in all_task_id or user_id not in all_user_id:
+            return
+
+        # Get the task to remove the user
+        task_to_remove: Task = list(filter(lambda t: t.task_id == task_id, self.tasks))[0]
+        task_to_remove.remove_user([user_id])
+    # ==========================================
+    def info(self):
+        """Show project information"""
+        if not len(self.workers):
+            print("Not users")
+            return
         self.show_users()
-        try:
-            if not user:
-                iuser = int (input("Select user: ")) - 1
-                user = self.users[iuser]
-            if user in self.users:
-                data = input("Enter the {}: ".format(method))
-                if method == "number":
-                    user.number = data
-                elif method == "email":
-                    user.email = data
-            else:
-                print("Invalid user")
-        except:
-            print("Cannot find the user")
-    #==========================================
-    def send_ws_message(self):
-        print(
-            """
-            1. Send message to all users
-            2. Send message to one user
-            """)
-        ifunc = input("Select: ")
-        self.show_users()
+        self.task_info()
 
-        if self.run_once:
-            ws.init()
-            self.run_once = False
-
-
-        if ifunc == "2":
-            iuser = int(input("Select user: ")) - 1
-            try:
-                user = self.users[iuser]
-                ws.send_message(user.number, user.show_user_info())
-            except:
-                print("Invalid user")
-        else:
-            for u in self.users:
-                ws.send_message(u.number, u.show_user_info())
-    #==========================================
+    # ==========================================
     def administrate_user(self):
         print(
             """
             1. Add user
-            2. Remove user 
+            2. Remove user
             3. Add user number
             4. Add user email
-            5. Show users
-            """)
+            5. Show users""")
         ifunc = input("Select: ")
         option = {
-        "1":self.add_user,
-        "2":self.remove_user,
-        "3":self.add_number,
-        "4":self.add_user_email,
-        "5":self.show_users
+            "1": self.add_user,
+            "2": self.remove_user,
+            "3": self.add_number,
+            "4": self.add_user_email,
+            "5": self.show_users
         }
         try:
             option[ifunc]()
-        except:
-            print("Invalid option")
-    #==========================================                    
+        except Exception:
+            print("Invalid option, ", Exception)
+
+    # ==========================================
     def administrate_task(self):
         print(
             """
             1. Add task
             2. Edit task
             3. Remove task
-            4. Show Task
-            """)
+            4. Show Task""")
         ifunc = input("Select: ")
         option = {
-        "1":self.add_task,
-        "2":self.edit_task,
-        "3":self.remove_task,
-        "4":self.show_task
+            "1": self.add_task,
+            "2": self.edit_task,
+            "3": self.remove_task,
+            "4": self.task_info
         }
         try:
             option[ifunc]()
         except:
             print("Invalid option")
-    #==========================================                    
+
+    # ==========================================
     def run(self):
-        self.options = {
-        "1":self.administrate_user,
-        "2":self.administrate_task,
-        "3":self.set_task,
-        "4":self.show_user_task,
-        "5":self.send_email_to_users,
-        "6":self.send_ws_message,
-        "7":True
+        options = {
+            "1": self.administrate_user,
+            "2": self.administrate_task,
+            "3": self.set_task,
+            "4": self.info,
+            "7": True
         }
         print("\n================{}=================".format(self.name))
         print("""
@@ -261,32 +278,48 @@ class Project:
         4. Show project info
         5. Send remainder email
         6. Send whastapp message
-        7. Exit
-        """)
+        7. Exit""")
         print("=====================================\n")
         self.user_in = input("Select: ")
-        if self.user_in != str(len(self.options)):
+        if self.user_in != str(len(options)):
             try:
-                self.options[self.user_in]()
-            except:
-                print("Option not available")
-    #==========================================     
-#== 
+                options[self.user_in]()
+            except RuntimeError:
+                print("Option not available: ", RuntimeError)
+
+
+# ==========================================
+# END
+
+
 if __name__ == "__main__":
+    # creation of user
+    jose = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308", 1)
+    noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538", 2)
 
-    # raul = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308")
-    # noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538")
+    # Creation of task
+    task1 = Task(task_id=1, project_id=1, creator_id=jose.user_id, description="Make API")
+    task2 = Task(task_id=2, project_id=1, creator_id=jose.user_id, description="Make API FOR MOBILE")
+    task3 = Task(task_id=3, project_id=1, creator_id=jose.user_id, description="Finish earthquakes analysis")
 
-    rtask = ["Create API", "Finish git", "Finish project"]
-    ntask = ["Create gmail API", "Learn git"]
+    # Create a project
+    project = Project(name="CoRe", user_id=jose.user_id, project_id=1)
+    # add user
+    project.add_user(jose)
+    project.add_user(noah)
 
-    project = Project("Raul Pichardo", "CoRe")
-    # project.add_user([raul, noah])
-    project.add_task([rtask, ntask])
-    # project.set_task(raul, rtask)
-    # project.set_task(noah, ntask)
+    # add task to our project
+    project.add_task([task1, task2, task3])
+
+    # set the task to user
+
+    print(project.set_task(jose.user_id, task1.task_id))
+    print(project.set_task(noah.user_id, task2.task_id))
+    print(project.set_task(jose.user_id, task2.task_id))
+
+    # project.remove_user_from_task(task_id=task1.task_id, user_id=jose.user_id)
 
     while project.user_in != '7':
         project.run()
-    
+
     print("Bye")
