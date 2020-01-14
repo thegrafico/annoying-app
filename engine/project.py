@@ -19,13 +19,11 @@ class Project:
     project_id: int
 
     def __init__(self, name: str, user_id: int, project_id: int, description=""):
-        # self.owner = owner
-        self.name = name
-        self.user_in = ""
-        self.project_desc = description
-        self.run_once = True
-        self.workers = []
+        self.creator_id = user_id
         self.project_id = project_id
+        self.name = name
+        self.project_desc = description
+        self.workers = []
         self.tasks = []
 
     # ==========================================
@@ -65,7 +63,6 @@ class Project:
             if user_id == elem.user_id:
                 del self.workers[i]
                 return
-
     # ==
 
     # ==========================================
@@ -76,13 +73,6 @@ class Project:
         task: task object to assign to user
         return: True if a least one task was added
         """
-        # if not len(task):  # task is empty?
-        #     print("Task is empty")
-        #     return False
-        # elif not len(self.workers):  # workers is empty??
-        #     print("Not user to add task")
-        #     return False
-
         # all unique id of user in the project
         allWorkersId = [u.user_id for u in self.workers]
         all_task_id = [t.task_id for t in self.tasks]
@@ -95,13 +85,10 @@ class Project:
 
         for i in range(len(self.tasks)):
             if task_id == self.tasks[i].task_id:
-                # self.task_info()
-                self.tasks[i].users.append(user_id)
+                self.tasks[i].assign_user(user_id)
                 # print(self.tasks[i].users)
-                print("THE TASK WITH THE ID: {}, WAS ASSIGNED TO THE USER WITH THE ID: {}".format(
-                    self.tasks[i].task_id, user_id))
-                # self.task_info()
-
+                # print("THE TASK WITH THE ID: {}, WAS ASSIGNED TO THE USER WITH THE ID: {}".format(
+                #     self.tasks[i].task_id, user_id))
                 return True
 
         return False
@@ -129,8 +116,21 @@ class Project:
                 wasAdded = True
         return wasAdded
     # ==
-    def remove_task(self, task_id: int):
-        pass
+    def remove_task(self, task_id: int) -> bool:
+        """
+        Remove a task for a project
+        param: task_id -> task id to remove
+        """
+        all_task_id = [t.task_id for t in self.tasks]
+
+        if task_id not in all_task_id:
+            return False
+
+        for i in range(len(self.tasks)):
+            if self.tasks[i].task_id == task_id:
+                del self.tasks[i]
+                return True
+        return False
 
     # ==
     def edit_task(self, task_id: int, new_values: {}):
@@ -176,8 +176,8 @@ class Project:
         print("*************************")
         print("Task:")
         for task in self.tasks:
-            msg = "Location: {}, ID: {}, creator_id: {}, Description: {}, "
-            print(msg.format(task, task.task_id, task.creator_id, task.description), end="")
+            msg = "ID: {}, creator_id: {}, Description: {}, "
+            print(msg.format(task.task_id, task.creator_id, task.description), end="")
             print("Assigned task: ", task.users)
         print("*************************")
 
@@ -193,7 +193,7 @@ class Project:
         return list(filter(lambda temp: (user_id in temp.assigned_ids), self.tasks))
 
     # ==
-    def remove_user_from_task(self, task_id: int, user_id: int):
+    def remove_user_from_task(self, user_id: int, task_id: int):
         """ Remove a task by user id """
 
         if not len(self.workers) or not len(self.tasks):
@@ -207,9 +207,18 @@ class Project:
         if task_id not in all_task_id or user_id not in all_user_id:
             return
 
-        # Get the task to remove the user
-        task_to_remove: Task = list(filter(lambda t: t.task_id == task_id, self.tasks))[0]
-        task_to_remove.remove_user([user_id])
+        # Get the list of task task to remove the user
+        list_task_to_remove = list(filter(lambda t: t.task_id == task_id, self.tasks))
+
+        # get the task to remove
+        task_to_remove: Task = list_task_to_remove[0] if len(list_task_to_remove) > 0 else None
+
+        # if task is None
+        if task_to_remove is None:
+            return
+
+        # remove the user from task
+        task_to_remove.remove_user(user_id=user_id)
     # ==========================================
     def info(self):
         """Show project information"""
@@ -218,76 +227,6 @@ class Project:
             return
         self.show_users()
         self.task_info()
-
-    # ==========================================
-    def administrate_user(self):
-        print(
-            """
-            1. Add user
-            2. Remove user
-            3. Add user number
-            4. Add user email
-            5. Show users""")
-        ifunc = input("Select: ")
-        option = {
-            "1": self.add_user,
-            "2": self.remove_user,
-            "3": self.add_number,
-            "4": self.add_user_email,
-            "5": self.show_users
-        }
-        try:
-            option[ifunc]()
-        except Exception:
-            print("Invalid option, ", Exception)
-
-    # ==========================================
-    def administrate_task(self):
-        print(
-            """
-            1. Add task
-            2. Edit task
-            3. Remove task
-            4. Show Task""")
-        ifunc = input("Select: ")
-        option = {
-            "1": self.add_task,
-            "2": self.edit_task,
-            "3": self.remove_task,
-            "4": self.task_info
-        }
-        try:
-            option[ifunc]()
-        except:
-            print("Invalid option")
-
-    # ==========================================
-    def run(self):
-        options = {
-            "1": self.administrate_user,
-            "2": self.administrate_task,
-            "3": self.set_task,
-            "4": self.info,
-            "7": True
-        }
-        print("\n================{}=================".format(self.name))
-        print("""
-        1. Administrate Users
-        2. Administrate Task
-        3. Set task to user
-        4. Show project info
-        5. Send remainder email
-        6. Send whastapp message
-        7. Exit""")
-        print("=====================================\n")
-        self.user_in = input("Select: ")
-        if self.user_in != str(len(options)):
-            try:
-                options[self.user_in]()
-            except RuntimeError:
-                print("Option not available: ", RuntimeError)
-
-
 # ==========================================
 # END
 
@@ -304,6 +243,7 @@ if __name__ == "__main__":
 
     # Create a project
     project = Project(name="CoRe", user_id=jose.user_id, project_id=1)
+
     # add user
     project.add_user(jose)
     project.add_user(noah)
@@ -312,14 +252,17 @@ if __name__ == "__main__":
     project.add_task([task1, task2, task3])
 
     # set the task to user
+    project.set_task(jose.user_id, task1.task_id)
+    project.set_task(jose.user_id, task2.task_id)
+    project.set_task(noah.user_id, task2.task_id)
+    project.task_info()
 
-    print(project.set_task(jose.user_id, task1.task_id))
-    print(project.set_task(noah.user_id, task2.task_id))
-    print(project.set_task(jose.user_id, task2.task_id))
+    project.remove_user_from_task(user_id=noah.user_id, task_id=task2.task_id)
+    project.task_info()
 
-    # project.remove_user_from_task(task_id=task1.task_id, user_id=jose.user_id)
+    project.remove_task(task2.task_id)
+    project.task_info()
+    project.set_task(noah.user_id, task2.task_id)
+    project.task_info()
 
-    while project.user_in != '7':
-        project.run()
 
-    print("Bye")

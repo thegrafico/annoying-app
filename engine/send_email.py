@@ -1,7 +1,7 @@
 #================================Dependencies==================================
 #to send mesj
 import smtplib, ssl
-#to manipulate the email format 
+#to manipulate the email format
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -12,11 +12,11 @@ except:
 
 print("Program was init")
 
-#Send mail function
-def sendEmail(emails, subject:str = "automated-BOT-remainder", text_message:str="Bot ramainder message"):
 
+# Send mail function
+def send_emails(emails: list, subject: str = "automated-BOT-remainder", text_message: str="Bot ramainder message"):
     smtp_server = "smtp.gmail.com"
-    sender_email = credentials.email
+    sender_email = credentials.username
     password = credentials.password
     receiver_email = emails
 
@@ -36,11 +36,10 @@ def sendEmail(emails, subject:str = "automated-BOT-remainder", text_message:str=
     with smtplib.SMTP_SSL(smtp_server, 465, context=context) as server:
         server.ehlo()
         server.login(sender_email, password)
-        server.sendmail(
-        sender_email, receiver_email, message.as_string()
-    )
+        server.sendmail(sender_email, receiver_email, message.as_string())
     print('Email was send to ', receiver_email)
 
+
 if __name__ == "__main__":
-    emails = ["raul022107@gmail.com","pichardoraul@gmail.com"]
-    sendEmail(emails)    
+    emails_to_send = ["raul022107@gmail.com", "pichardoraul@gmail.com"]
+    send_emails(emails_to_send)
