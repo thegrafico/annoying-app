@@ -6,42 +6,44 @@ App to project managments the project of the CoRe Lab
 
 # TODO: improve task for users
 
-import whastapp as ws
-from send_email import sendEmail
+
+import sys
+import os
+file_path = os.path.dirname(__file__)
+print(file_path)
+sys.path.append(os.path.abspath(file_path))
+
 from task import Task
-from user import User
+from typing import List
 
 
 class Project:
-    tasks: [Task]
-    owner: User
-    workers: [User]
+    tasks: List[Task]
+    workers: List[int]
     project_id: int
 
     def __init__(self, name: str, user_id: int, project_id: int, description=""):
         self.creator_id = user_id
         self.project_id = project_id
         self.name = name
-        self.project_desc = description
+        self.description = description
         self.workers = []
         self.tasks = []
+        self.workers.append(user_id)
 
     # ==========================================
-    def add_user(self, user: User):
+    def add_user(self, user_id: int):
         """Add just one user"""
 
+        print("Adding user_id: {} -> to the project: {}".format(user_id, self.project_id))
+
         if len(self.workers) > 0:
-            users_id = [temp.user_id for temp in self.workers]
+            all_user_id = [ID for ID in self.workers]
         else:
-            users_id = []
-
-        if user.user_id not in users_id:
-            self.workers.append(user)
-            users_id.append(user.user_id)
-        else:
-            self.workers.append(user)
-
-        self.show_users()
+            all_user_id = []
+        if user_id not in all_user_id:
+            self.workers.append(user_id)
+            all_user_id.append(user_id)
     # ==
 
     def remove_user_by_id(self, user_id: int):
@@ -53,48 +55,53 @@ class Project:
             return
 
         # get all user ids
-        all_user_ids = [u.user_id for u in self.workers]
+        all_user_ids = [ID for ID in self.workers]
 
         # verify if user exits
         if user_id not in all_user_ids:
             return
 
-        for elem, i in enumerate(self.workers):
-            if user_id == elem.user_id:
+        for ID, i in enumerate(self.workers):
+            if user_id == ID:
                 del self.workers[i]
                 return
     # ==
 
     # ==========================================
-    def set_task(self, user_id: int, task_id: int) -> bool:
+    def set_task(self, user_id: int, tasks_id: List[int]) -> bool:
         """
         Assign task to users. Task have to be created
-        param: userid ->Id of the user to assign task
-        task: task object to assign to user
-        return: True if a least one task was added
+        :param user_id ->Id of the user to assign task
+        :param tasks_id: List of task_id to add to the user
+        :returns bool: True if a least one task was added
         """
+
+        if not len(tasks_id):
+            return False
+
+        # Remove duplicates
+        tasks_id = list(set(tasks_id))
+
         # all unique id of user in the project
-        allWorkersId = [u.user_id for u in self.workers]
-        all_task_id = [t.task_id for t in self.tasks]
+        allWorkersId = [ID for ID in self.workers]
 
         # Verify user_id and verify if this id is for one of the workers in the project
         # TODO: verify is task exits
-        if user_id < 1 or user_id not in allWorkersId or task_id not in all_task_id:
+        if user_id < 1 or user_id not in allWorkersId:
             print("User id not belong to anyone in the project")
             return False
 
+        something_was_added = False
         for i in range(len(self.tasks)):
-            if task_id == self.tasks[i].task_id:
-                self.tasks[i].assign_user(user_id)
-                # print(self.tasks[i].users)
-                # print("THE TASK WITH THE ID: {}, WAS ASSIGNED TO THE USER WITH THE ID: {}".format(
-                #     self.tasks[i].task_id, user_id))
-                return True
+            for j in range(len(tasks_id)):
+                if tasks_id[j] == self.tasks[i].task_id:
+                    self.tasks[i].assign_user(user_id)
+                    something_was_added = True
 
-        return False
+        return something_was_added
 
     # =================CRUD SYSTEM=========================
-    def add_task(self, task: [Task]) -> bool:
+    def add_task(self, task: List[Task]) -> bool:
         """Adding task"""
 
         wasAdded = False
@@ -159,9 +166,9 @@ class Project:
     def show_users(self):
         if len(self.workers) > 0:
             print("*************************")
-            print("Users:")
-            for n, user in enumerate(self.workers, start=1):
-                print("{}. {}".format(n, user.name))
+            print("Users Id:")
+            for n, user_id in enumerate(self.workers, start=1):
+                print("{}. {}".format(n, user_id))
             print("*************************")
         else:
             print("Not users")
@@ -182,7 +189,7 @@ class Project:
         print("*************************")
 
     # ==
-    def get_task_by_user(self, user_id: int) -> [Task]:
+    def get_task_by_user(self, user_id: int) -> List[Task]:
         """Return all task assigned to a user using the user_id"""
 
         # Verify is task is empty
@@ -201,7 +208,7 @@ class Project:
 
         # all tasks id and user id
         all_task_id = [t.task_id for t in self.tasks]
-        all_user_id = [u.user_id for u in self.workers]
+        all_user_id = [ID for ID in self.workers]
 
         # verify is exist
         if task_id not in all_task_id or user_id not in all_user_id:
@@ -231,38 +238,38 @@ class Project:
 # END
 
 
-if __name__ == "__main__":
-    # creation of user
-    jose = User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308", 1)
-    noah = User("Noah Almeda", "noahalmeda@gmail.com", "7874318538", 2)
-
-    # Creation of task
-    task1 = Task(task_id=1, project_id=1, creator_id=jose.user_id, description="Make API")
-    task2 = Task(task_id=2, project_id=1, creator_id=jose.user_id, description="Make API FOR MOBILE")
-    task3 = Task(task_id=3, project_id=1, creator_id=jose.user_id, description="Finish earthquakes analysis")
-
-    # Create a project
-    project = Project(name="CoRe", user_id=jose.user_id, project_id=1)
-
-    # add user
-    project.add_user(jose)
-    project.add_user(noah)
-
-    # add task to our project
-    project.add_task([task1, task2, task3])
-
-    # set the task to user
-    project.set_task(jose.user_id, task1.task_id)
-    project.set_task(jose.user_id, task2.task_id)
-    project.set_task(noah.user_id, task2.task_id)
-    project.task_info()
-
-    project.remove_user_from_task(user_id=noah.user_id, task_id=task2.task_id)
-    project.task_info()
-
-    project.remove_task(task2.task_id)
-    project.task_info()
-    project.set_task(noah.user_id, task2.task_id)
-    project.task_info()
+# if __name__ == "__main__":
+    # # creation of user
+    # jose = user.User("Jose alfonzo", "jalfonzo7400@interbayamon.edu", "7874281308", 1)
+    # noah = user.User("Noah Almeda", "noahalmeda@gmail.com", "7874318538", 2)
+    #
+    # # Creation of task
+    # task1 = task.Task(task_id=1, project_id=1, creator_id=jose.user_id, description="Make API")
+    # task2 = task.Task(task_id=2, project_id=1, creator_id=jose.user_id, description="Make API FOR MOBILE")
+    # task3 = task.Task(task_id=3, project_id=1, creator_id=jose.user_id, description="Finish earthquakes analysis")
+    #
+    # # Create a project
+    # project = Project(name="CoRe", user_id=jose.user_id, project_id=1)
+    #
+    # # add user
+    # project.add_user(jose)
+    # project.add_user(noah)
+    #
+    # # add task to our project
+    # project.add_task([task1, task2, task3])
+    #
+    # # set the task to user
+    # project.set_task(jose.user_id, task1.task_id)
+    # project.set_task(jose.user_id, task2.task_id)
+    # project.set_task(noah.user_id, task2.task_id)
+    # project.task_info()
+    #
+    # project.remove_user_from_task(user_id=noah.user_id, task_id=task2.task_id)
+    # project.task_info()
+    #
+    # project.remove_task(task2.task_id)
+    # project.task_info()
+    # project.set_task(noah.user_id, task2.task_id)
+    # project.task_info()
 
 

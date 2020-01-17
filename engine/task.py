@@ -1,5 +1,5 @@
 import datetime
-from status import Status
+import status
 
 
 class Task:
@@ -8,11 +8,12 @@ class Task:
         self.project_id = project_id
         self.creator_id = creator_id
         self.creating_date = str(datetime.datetime.today())
-        self.status = Status.INCOMPLETE
+        self.status = status.Status.INCOMPLETE
         self.description = description
         self.users = list()
         self.start_date = str(datetime.datetime.today())
         self.end_date = None
+        self.priority = 0
 
     # --
     def assign_user(self, user_id: int):
@@ -40,14 +41,6 @@ class Task:
         if user_id in self.users:
             # remove the user
             self.users.remove(user_id)
-    # ==
-    def change_status(self, status: Status):
-        """Change the status of the task"""
-        if self.status != status:
-            if status == Status.COMPLETED:
-                self.end_date = str(datetime.datetime.today())
-            self.status = status
-        # TODO: update the database
 
     def edit(self, new_values: dict) -> bool:
         """
