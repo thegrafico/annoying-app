@@ -9,27 +9,31 @@ from engine.project import Project
 from engine.task import Task
 from db.sql_connection import SQLiteConnection as Sql
 import engine.send_email as Email
+import engine.encryption as Encrypt
 from engine.status import Status
 from typing import List
 
+# ============================== SETUP =====================================
 # Connect to the database
 conn = Sql("./pythonsqlite.db")
 conn.init_db()
 
-# # Create a new User in the database
-# raul = User("Raul Pichardo", "raul022107@gmail.com", "7873776957")
-# nicole = User("Nicole Santiago", "nicole@gmail.com", "9392321555")
-#
-# raul.user_id = conn.create_user(raul)
-# nicole.user_id = conn.create_user(nicole)
+# key for encryption
+KEY = Encrypt.read_key_from_file(file_path="./key.key")  # use default parameter path
 
-users: List[User] = []
+# ============================== END SETUP =====================================
+login_options = """ 1. Create Account\n 2. Login\n 3. Forgot password"""
 
-users_from_db = conn.get_table("user")
 
-for u in users_from_db:
-    users.append(User(name=u[1], email=u[2], number=u[3], user_id=u[0]))
+def create_user():
+    name = input("Insert username: ")
 
-for temp_user in users:
-    # print(temp_user.name, temp_user.email, temp_user.number, temp_user.user_id)
-    temp_user.info()
+    # TODO: verify password len, number, lower and upper
+    password = Encrypt.encrypt_data(key=KEY, data=input("Insert Password: "))
+
+    email = input("Insert email: ")
+
+    number = input("Insert phone number: ")
+
+    new_user = User(name=name, email=email, number=number)
+    Sql.create_user(user=new_user, password=password)

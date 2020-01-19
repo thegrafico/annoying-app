@@ -13,7 +13,7 @@ class SQLiteConnection:
 
     _conn = None
     
-    def __init__(self, filename:str):
+    def __init__(self, filename: str):
         """Connect to the sqlite filename is exits, if not exits then create a new file"""
         try:
             self._conn = sqlite3.connect(filename)
@@ -47,9 +47,10 @@ class SQLiteConnection:
                                     id integer PRIMARY KEY,
                                     name text NOT NULL,
                                     email text NOT NULL UNIQUE,
-                                    number text NOT NULL
-                                    );""" 
-                                    
+                                    number text NOT NULL,
+                                    password text NOT NULL
+                                    );"""
+
         # project table
         sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS PROJECTS (
                                             id integer PRIMARY KEY,
@@ -100,19 +101,20 @@ class SQLiteConnection:
             self.create_table(query)
 
     # -- 
-    def create_user(self, user: User) -> int:
+    def create_user(self, user: User, password: str) -> int:
         """
             Create a new user
             :param user: user object
+            :param password: password of the user
             :return: id of the user inserted
         """
     
         # query for insert
-        sql = '''INSERT INTO user (id, name, email, number) VALUES(?,?,?,?);'''
+        sql = '''INSERT INTO user (id, name, email, number, password) VALUES(?,?,?,?,?);'''
         
         cur = self._conn.cursor()
         
-        cur.execute(sql, [None, user.name, user.email, user.number])
+        cur.execute(sql, [None, user.name, user.email, user.number, password])
 
         self._conn.commit()
 
@@ -136,6 +138,7 @@ class SQLiteConnection:
 
         return True
     # --
+    # TODO: table don't exits
     def get_table(self, table: str) -> list:
         """
         Show the information of the table
@@ -143,11 +146,13 @@ class SQLiteConnection:
         :return: list of tuples of all data
         """
         cur = self._conn.cursor()
-        
-        cur.execute("SELECT * FROM {}".format(table))
-        
-        rows = cur.fetchall()
-        
+        rows = []
+        try:
+            cur.execute("SELECT * FROM {}".format(table))
+            rows = cur.fetchall()
+        except Exception as e:
+            print("Table not found,", e)
+
         # return the data is there are any, otherwise return an empty list
         return rows if len(rows) > 0 else []
     # --
@@ -164,9 +169,7 @@ class SQLiteConnection:
         cur.execute(query, [email])
         
         row = cur.fetchall()
-        
-        print(row)
-        
+
         return row
     # --
     def get_project_data_by_userid(self, user_id: int) -> list:
@@ -256,5 +259,3 @@ if __name__ == '__main__':
     
     for x in conn.get_table("user"):
         print(x)
-    
-    
