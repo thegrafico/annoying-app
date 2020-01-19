@@ -3,13 +3,14 @@
     TODO: sanitaze the queries
     TODO: Create a new relational model of the database
 """
-import sys
-sys.path.insert(1, './engine')
 import sqlite3
 from sqlite3 import Error
-from user import User
+from engine.user import User
 
+
+# Class
 class SQLiteConnection:
+
     _conn = None
     
     def __init__(self, filename:str):
@@ -19,11 +20,11 @@ class SQLiteConnection:
             print("Connected to the database '{}'".format(filename))
         except Error as e:
             print(e)
-    #--
-    def create_table(self, sql_query:str) -> bool:
+    # --
+    def create_table(self, sql_query: str) -> bool:
         """
         Create a table in the database
-        param: sql_query:str -> query statement for creation of table
+        :param:sql_query: query statement for creation of table
         return: true if table was created, otherwise return false
         """
         try:
@@ -34,14 +35,14 @@ class SQLiteConnection:
         except Error as e:
             print(e)
             return False
-    #--
+    # --
     def init_db(self):
         """Create all the tables for the project"""
     
         if self._conn is None:
             print("ERROR: Can't connect to the database")
 
-        #USERS TABLE
+        # USERS TABLE
         sql_create_users_table = """CREATE TABLE IF NOT EXISTS USER (
                                     id integer PRIMARY KEY,
                                     name text NOT NULL,
@@ -49,13 +50,13 @@ class SQLiteConnection:
                                     number text NOT NULL
                                     );""" 
                                     
-        #project table
+        # project table
         sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS PROJECTS (
                                             id integer PRIMARY KEY,
                                             project_name text NOT NULL,
                                             description text DEFAULT ""
                                         ); """                                
-        #TASK table
+        # TASK table
         sql_create_tasks_table = """CREATE TABLE IF NOT EXISTS TASK (
                                         id integer PRIMARY KEY,
                                         description text NOT NULL,
@@ -69,7 +70,6 @@ class SQLiteConnection:
                                         FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
                                     );"""
 
-      
         sql_create_task_assignation_table = """CREATE TABLE IF NOT EXISTS TASK_ASSIGNATION (
                                     userid integer,
                                     taskid integer,
@@ -78,36 +78,36 @@ class SQLiteConnection:
                                     );"""
 
         sql_create_project_user_table = """CREATE TABLE IF NOT EXISTS PROJECT_USER (
-                                    userId integer,
-                                    projectId integer,
-                                    FOREIGN KEY (userId) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
-                                    FOREIGN KEY (projectId) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
+                                    user_id integer,
+                                    project_id integer,
+                                    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
+                                    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
                                     );"""
 
         # sql_create_project_task_table = """CREATE TABLE IF NOT EXISTS PROJECT_TASK (
         #                         taskId integer NOT NULL,
-        #                         projectId integer NOT NULL,
+        #                         project_id integer NOT NULL,
         #                         FOREIGN KEY (taskId) REFERENCES task (id) ON DELETE CASCADE ON UPDATE CASCADE,
-        #                         FOREIGN KEY (projectId) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
+        #                         FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
         #                         );"""
 
-        #list of querys to create in the database
+        # list of queries to create in the database
         db_tables = [sql_create_projects_table, sql_create_tasks_table, sql_create_users_table,
                       sql_create_project_user_table, sql_create_task_assignation_table]
         
-        #create all the tables if not exits
+        # create all the tables if not exits
         for query in db_tables:
-            print(self.create_table(query))
+            self.create_table(query)
 
-    #-- 
-    def create_user(self, user:User)->int:
+    # -- 
+    def create_user(self, user: User) -> int:
         """
             Create a new user
-            param: user_data -> User class
+            :param user: user object
             :return: id of the user inserted
         """
     
-        #query for insert
+        # query for insert
         sql = '''INSERT INTO user (id, name, email, number) VALUES(?,?,?,?);'''
         
         cur = self._conn.cursor()
@@ -117,12 +117,30 @@ class SQLiteConnection:
         self._conn.commit()
 
         return cur.lastrowid
-    #--
-    def get_table(self, table:str)-> list:
+    # --
+    def delete_user(self, user_id: int) -> bool:
+        """
+        Remove a user
+        :param user_id: id of the user to remove
+        """
+
+        query = "DELETE * FROM user WHERE userid = ?"
+
+        cur = self._conn.cursor()
+        try:
+            cur.execute(query, [user_id])
+            self._conn.commit()
+        except Exception as e:
+            print(e)
+            return False
+
+        return True
+    # --
+    def get_table(self, table: str) -> list:
         """
         Show the information of the table
-        param: table -> table name
-        return: list of tuples of all data
+        :param table: -> table name
+        :return: list of tuples of all data
         """
         cur = self._conn.cursor()
         
@@ -130,14 +148,14 @@ class SQLiteConnection:
         
         rows = cur.fetchall()
         
-        #return the data is there are any, otherwise return an empty list
+        # return the data is there are any, otherwise return an empty list
         return rows if len(rows) > 0 else []
-    #--
-    def get_user_by_email(self, email:str):
+    # --
+    def get_user_by_email(self, email: str) -> list:
         
-        #an email need a least 3 char (@.es, @.com, etc)
+        # an email need a least 3 char (@.es, @.com, etc)
         if len(email) < 4:
-            return True
+            return []
         
         query = "SELECT * FROM USER WHERE email = ?"
         
@@ -149,9 +167,9 @@ class SQLiteConnection:
         
         print(row)
         
-        return False
-    #--
-    def get_project_data_by_userid(self, userId:str)->list:
+        return row
+    # --
+    def get_project_data_by_userid(self, user_id: int) -> list:
         """Get all projects by the userID"""
         
         query = """SELECT * FROM projects WHERE userid = ? """
@@ -159,44 +177,47 @@ class SQLiteConnection:
         cur = self._conn.cursor()
         
         try:
-            cur.execute(query, [int(userId)])
+            cur.execute(query, [user_id])
             return cur.fetchall()
         except:
             print("ERROR: Data can not be found")
             return []
-    #--
-    def fecthAllTask(self, userId:int)->list:
-        """Get all task from an user with the userId"""
+    # --
+    def fecth_all_task(self, user_id: int) -> list:
+        """Get all task from an user with the user_id"""
         query = "SELECT * FROM TASK where user"
-    #--
-    def create_project(self, user:User, name:str, description:str = "")->bool:
+        pass
+    
+    # --
+    def create_project(self, user_id: int, name: str, description: str = "") -> int:
         """
         Create a new project
-        Param: userId -> unique Id of the owner of the project (must exits before)
-        Param: name -> project name
-        Param: description -> description of the project (empty by default) 
-        return: project id 
+        :param user_id: -> unique Id of the owner of the project (must exits before)
+        :param name: project name
+        :param description: description of the project (empty by default) 
+        :returns: id of the project created, (id > 0) Good, (id == 0) Bad
         """
-        if len(name) < 4:
+        
+        if len(name) < 3:
             print("Project name is too short, Try again with a different name")
-            return False
+            return -1
         
         query = "INSERT INTO projects VALUES(?, ?, ?)"
         
         cur = self._conn.cursor()
         
         cur.execute(query, [None, name, description])
-        projectId = cur.lastrowid
+        project_id = cur.lastrowid
         
         query = "INSERT INTO PROJECT_USER VALUES(?, ?)"
     
-        cur.execute(query, [user.userId, projectId])
+        cur.execute(query, [user_id, project_id])
         
         self._conn.commit()
         
-        return True
+        return project_id
     
-    def add_user_to_project(self, userId:int, projectId:int)->bool:
+    def add_user_to_project(self, user_id: int, project_id: int) -> bool:
         """ Add an user to a new project"""
         
         #TODO: verify is user not in project firts
@@ -205,27 +226,25 @@ class SQLiteConnection:
         
         try:  
             cur = self._conn.cursor()
-            cur.execute(query, [userId,projectId])
+            cur.execute(query, [user_id, project_id])
             self._conn.commit()
             return True
         except:
             return False
+# -- End of class
 
-        
-#-- End of class
 
-#==run
 if __name__ == '__main__':
 
     tables = ['user', 'projects', 'task', 'TASK_USER', 'PROJECT_USER', 'PROJECT_TASK']
   
-    new_user = User(name = "Raul Pichardo", email="raul022108@gmail.com", number="7873776957")
+    new_user = User(name="Raul Pichardo", email="raul022108@gmail.com", number="7873776957")
   
     conn = SQLiteConnection("./pythonsqlite.db")
     
     conn.init_db()
     
-    # new_user.userId = conn.create_user(new_user) 
+    # new_user.user_id = conn.create_user(new_user) 
     
     # conn.create_project(new_user, "Capstone", "Scrum capstone")
     

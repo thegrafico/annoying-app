@@ -4,17 +4,10 @@ devpichardo@gmail.com
 
 User class to give projects
 """
-
-import sys
-import os
-file_path = os.path.dirname(__file__)
-print(file_path)
-sys.path.append(os.path.abspath(file_path))
-
-import validation_for_project
-from project import Project
-from task import Task
-from typing import List, IO
+from engine.project import Project
+import engine.validation_for_project as Validation
+from engine.task import Task
+from typing import List
 
 
 # Class User
@@ -30,7 +23,7 @@ class User:
         """
         self.name = name
         self.email = self.validate_email(email)
-        self.number = self.validate_number(number) if number else ""
+        self.number = self.validate_number(number)
         self.user_id = user_id
         self.projects = []
     # ==========================================
@@ -117,12 +110,12 @@ class User:
 
     def validate_email(self, email: str) -> str:
 
-        isValid = validation_for_project.validate_email(email)
+        isValid = Validation.validate_email(email)
 
         return email if isValid else ""
     # ==========================================
     def validate_number(self, number):
-        isNumber = validation_for_project.validate_number(number)
+        isNumber = Validation.validate_number(number)
 
         return number if isNumber else ""
     # ==========================================
@@ -138,7 +131,10 @@ class User:
             print(desc.format(p.project_id, p.name, p.description), end=', ')
             print(workers, p.workers, end=", ")
             print(task, p.tasks)
-
+    # --
+    def info(self):
+        data = "Name: {}, email: {}, Number: {}, ID: {}"
+        print(data.format(self.name, self.email, self.number, self.user_id))
 
 if __name__ == "__main__":
 

@@ -6,17 +6,19 @@ import time
 import random
 
 browser = None
+
+
 def init():
     print("Init whastapp")
     global browser
-    #to use googlechrome
-    browser = webdriver.Chrome("./engine/driver/chromedriver.exe")
+    # to use googlechrome
+    browser = webdriver.Chrome("../web_driver/chromedriver.exe")
     # browser.set_window_size(300, 500)
     # browser.set_window_position(0, 0)
 
     # browser.execute_script("window.open('','_blank');")
 
-    #open chrome and go to github
+    # open chrome and go to github
     browser.get("https://web.whatsapp.com/")
 
     time.sleep(5)

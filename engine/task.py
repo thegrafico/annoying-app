@@ -1,14 +1,20 @@
 import datetime
-import status
+from engine.status import Status
 
 
 class Task:
     def __init__(self, task_id: int, project_id: int, creator_id: int = None, description: str = None):
+        """
+        :param task_id: id of the task
+        :param project_id: id of the project task belong to
+        :param creator_id: id of the creator of the task
+        :param description: description of the task
+        """
         self.task_id = task_id
         self.project_id = project_id
         self.creator_id = creator_id
         self.creating_date = str(datetime.datetime.today())
-        self.status = status.Status.INCOMPLETE
+        self.status = Status.INCOMPLETE
         self.description = description
         self.users = list()
         self.start_date = str(datetime.datetime.today())
@@ -19,7 +25,7 @@ class Task:
     def assign_user(self, user_id: int):
         """
         Assign user to the task
-        param: user_id -> id of the user to add
+        :param user_id: id of the user to add > 1
         """
 
         if user_id < 1:
@@ -30,8 +36,8 @@ class Task:
     # --
     def remove_user(self, user_id: int):
         """
-        remove one or multiple user from task
-        user_id: list of user_id to remove task
+        remove one user from task
+        :param user_id: list of user_id to remove task
         """
         # verify is empty
         if user_id < 1:

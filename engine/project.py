@@ -7,13 +7,7 @@ App to project managments the project of the CoRe Lab
 # TODO: improve task for users
 
 
-import sys
-import os
-file_path = os.path.dirname(__file__)
-print(file_path)
-sys.path.append(os.path.abspath(file_path))
-
-from task import Task
+from engine.task import Task
 from typing import List
 
 
