@@ -106,17 +106,20 @@ class SQLiteConnection:
             Create a new user
             :param user: user object
             :param password: password of the user
-            :return: id of the user inserted
+            :return: id of the user inserted. return -1 for errors
         """
     
         # query for insert
         sql = '''INSERT INTO user (id, name, email, number, password) VALUES(?,?,?,?,?);'''
         
         cur = self._conn.cursor()
-        
-        cur.execute(sql, [None, user.name, user.email, user.number, password])
 
-        self._conn.commit()
+        try:
+            cur.execute(sql, [None, user.name, user.email, user.number, password])
+            self._conn.commit()
+        except Exception as e:
+            print("Error creating user,", e)
+            return -1
 
         return cur.lastrowid
     # --
@@ -126,7 +129,7 @@ class SQLiteConnection:
         :param user_id: id of the user to remove
         """
 
-        query = "DELETE * FROM user WHERE userid = ?"
+        query = "DELETE FROM user WHERE id = ?"
 
         cur = self._conn.cursor()
         try:
@@ -156,22 +159,58 @@ class SQLiteConnection:
         # return the data is there are any, otherwise return an empty list
         return rows if len(rows) > 0 else []
     # --
-    def get_user_by_email(self, email: str) -> list:
+    def get_user_by_email(self, email: str) -> dict:
+        """
+        Get user by email
+        :param email: user email
+        :return: a dict with user values, if user not found return an empty dict
+        """
         
         # an email need a least 3 char (@.es, @.com, etc)
         if len(email) < 4:
-            return []
+            return {}
         
         query = "SELECT * FROM USER WHERE email = ?"
         
         cur = self._conn.cursor()
         
         cur.execute(query, [email])
-        
+
+        row = list(cur.fetchone())
+
+        print(row)
+
+        description = [col[0] for col in cur.description]
+
+        dict_values = dict(zip(description, row))
+
+        return dict_values
+    # --
+
+    # --
+    def get_user(self, email: str, password: str):
+        """
+        Get the user information
+        :param email: email of the user
+        :param password: password of the user
+        :returns: user if found, otherwise return None
+        """
+
+        if not len(email) or not len(password):
+            return None
+
+        query = "SELECT * FROM USER WHERE email = ? AND password = ?"
+
+        cur = self._conn.cursor()
+
+        cur.execute(query, [email, password])
+
         row = cur.fetchall()
+        print(row)
+        # print(cur.description)
 
         return row
-    # --
+
     def get_project_data_by_userid(self, user_id: int) -> list:
         """Get all projects by the userID"""
         
