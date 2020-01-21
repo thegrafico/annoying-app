@@ -176,9 +176,12 @@ class SQLiteConnection:
         
         cur.execute(query, [email])
 
-        row = list(cur.fetchone())
+        row = cur.fetchone()
 
-        print(row)
+        if row is None:
+            return {}
+
+        row = list(row)
 
         description = [col[0] for col in cur.description]
 
@@ -211,18 +214,18 @@ class SQLiteConnection:
 
         return row
 
-    def get_project_data_by_userid(self, user_id: int) -> list:
+    def get_projects_by_user_id(self, user_id: int) -> list:
         """Get all projects by the userID"""
         
-        query = """SELECT * FROM projects WHERE userid = ? """
+        query = """SELECT * FROM projects WHERE id = ? """
         
         cur = self._conn.cursor()
         
         try:
             cur.execute(query, [user_id])
             return cur.fetchall()
-        except:
-            print("ERROR: Data can not be found")
+        except Exception as e:
+            print("ERROR: Data can not be found: ", e)
             return []
     # --
     def fecth_all_task(self, user_id: int) -> list:
@@ -231,7 +234,7 @@ class SQLiteConnection:
         pass
     
     # --
-    def create_project(self, user_id: int, name: str, description: str = "") -> int:
+    def create_project(self, user_id: int, name: str, description: str = "") -> bool:
         """
         Create a new project
         :param user_id: -> unique Id of the owner of the project (must exits before)
@@ -242,22 +245,29 @@ class SQLiteConnection:
         
         if len(name) < 3:
             print("Project name is too short, Try again with a different name")
-            return -1
+            return False
         
         query = "INSERT INTO projects VALUES(?, ?, ?)"
         
         cur = self._conn.cursor()
-        
-        cur.execute(query, [None, name, description])
-        project_id = cur.lastrowid
-        
+
+        try:
+            cur.execute(query, [None, name, description])
+            project_id = cur.lastrowid
+        except Exception as e:
+            print("Error creating the project: ", e)
+            return False
+
+        # Second query, insert the project id into other table
         query = "INSERT INTO PROJECT_USER VALUES(?, ?)"
-    
+
+        # exe. second query
         cur.execute(query, [user_id, project_id])
-        
+
+        # Save change into the database
         self._conn.commit()
         
-        return project_id
+        return True
     
     def add_user_to_project(self, user_id: int, project_id: int) -> bool:
         """ Add an user to a new project"""
