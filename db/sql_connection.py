@@ -141,6 +141,27 @@ class SQLiteConnection:
 
         return True
     # --
+    def remove_project_by_id(self, project_id: int) -> bool:
+        """
+        Remove project by id
+        :param project_id: id of the project
+        :return:
+        """
+
+        query = "DELETE FROM PROJECT WHERE id = ?"
+
+        cur = self._conn.cursor()
+
+        try:
+            cur.execute(query, [project_id])
+        except Exception as e:
+            print(e)
+            return False
+
+        self._conn.commit()
+        return True
+
+    # --
     # TODO: table don't exits
     def get_table(self, table: str) -> list:
         """
@@ -217,21 +238,41 @@ class SQLiteConnection:
     def get_projects_by_user_id(self, user_id: int) -> list:
         """Get all projects by the userID"""
         
-        query = """SELECT * FROM projects WHERE id = ? """
+        query = """SELECT * FROM PROJECTS INNER JOIN PROJECT_USER ON PROJECTS.id == PROJECT_USER.project_id 
+        WHERE PROJECT_USER.user_id == ? """
         
         cur = self._conn.cursor()
-        
+
+        projects = None
+
         try:
             cur.execute(query, [user_id])
-            return cur.fetchall()
+            projects = cur.fetchall()
         except Exception as e:
             print("ERROR: Data can not be found: ", e)
             return []
+
+        # if there is not projects
+        if not len(projects):
+            return []
+
+        description = [col[0] for col in cur.description]
+
+        all_projects = []
+
+        # Create an list of dict with all project information
+        for project in projects:
+            project = list(project)
+
+            all_projects.append(dict(zip(description, project)))
+
+        return all_projects
+
     # --
     def fecth_all_task(self, user_id: int) -> list:
         """Get all task from an user with the user_id"""
         query = "SELECT * FROM TASK where user"
-        pass
+        return []
     
     # --
     def create_project(self, user_id: int, name: str, description: str = "") -> bool:

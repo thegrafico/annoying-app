@@ -226,8 +226,11 @@ class Project:
         if not len(self.workers):
             print("Not users")
             return
+        print("======================= INFO =======================")
+        print(self.name)
         self.show_users()
         self.task_info()
+        print("=====================================================")
 # ==========================================
 # END
 
