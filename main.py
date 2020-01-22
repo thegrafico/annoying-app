@@ -23,7 +23,7 @@ KEY = Encrypt.read_key_from_file(file_path="./key.key")  # use default parameter
 
 # options when application startup
 login_options = " 1. Create Account\n 2. Login\n 3. Forgot password"
-project_options = " 1. Create Project\n 2. Show Projects\n 3. Select a Project"
+project_options = " 1. Create Project\n 2. Show Projects\n 3. Select a Project\n 4. Remove project"
 invalid_option_message = "Invalid option, Please try again. Type 0 to end the program"
 
 # ============================== END SETUP =====================================
@@ -154,6 +154,7 @@ def user_is_login(user: User):
     """
     Second Prompt - where user just login. Here the user select the project to work
     :param user: User Object
+    :return : project id if a project was selected
     """
     options = {"1": create_project, "2": show_projects_by_user, "3": select_project, "4": remove_project}
 
@@ -162,13 +163,27 @@ def user_is_login(user: User):
 
         user_input = input("Select # Option: ")
 
+        if user_input == "0":
+            return None
+
         # If the user_input is not in the dict, start again.
         if user_input not in options.keys():
             print(invalid_option_message)
             continue
 
+        if user_input == "3":
+            project_id = options[user_input](user)
+
+            if project_id > 0:
+                return project_id
+
+
         # Run the function
         options[user_input](user)
+
+# --
+def user_selected_a_project(user:User, project_id: int):
+    pass
 
 
 # ========================================== PROJECTS FUNCTIONS ====================================
@@ -241,15 +256,19 @@ def get_projects_by_user_id(user_id: int) -> List[Project]:
 
 
 # --
-def select_project(user: User):
+def select_project(user: User) -> int:
     """
     Select a project for work
     :param user: user object to select the project
+    :return : project_id
     """
 
-    user_input = get_int("Select the project id: ")
-
     user.projects = get_projects_by_user_id(user.user_id)
+
+    if not len(user.projects):
+        return 0
+
+    user_input = get_int("Select the project id: ")
 
     all_projects_id = user.get_projects_id()
 
@@ -259,6 +278,8 @@ def select_project(user: User):
     project = user.get_project_by_id(user_input)
     print("===== PROJECT INFO =====")
     project.info()
+
+    return user_input
 
 
 # --
@@ -271,7 +292,6 @@ def remove_project(user: User):
     user.projects = get_projects_by_user_id(user.user_id)
 
     if not len(user.projects):
-        print("You don't have any project to remove")
         return
 
     msg = "Insert the project id to remove: "
@@ -281,12 +301,16 @@ def remove_project(user: User):
     all_projects_id = user.get_projects_id()
 
     while user_input not in all_projects_id:
-        print("invalid option, Try again")
+        print("invalid option, Try again. Type 0 for exit")
         user_input = get_int(msg)
 
-    project_was_remove = conn.remove_project_by_id(user_input)
+        if user_input == 0:
+            return
 
-    if not project_was_remove:
+    # Remove project from db
+    project_was_removed = conn.remove_project_by_id(user_input)
+
+    if not project_was_removed:
         print("Cannot remove the project")
         return
 
@@ -319,5 +343,11 @@ if __name__ == "__main__":
         print("Login failed, Try again or type 0 to end the program")
         user = user_is_not_login()
 
-    # Second step
-    user_is_login(user)
+    # Second step - User select a project to work in
+    project_id = user_is_login(user)
+
+    if not project_id:
+        exit()
+
+    # Third Step - user is working in a project
+

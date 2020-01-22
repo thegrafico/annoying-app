@@ -148,7 +148,7 @@ class SQLiteConnection:
         :return:
         """
 
-        query = "DELETE FROM PROJECT WHERE id = ?"
+        query = "DELETE FROM PROJECTS WHERE id = ?"
 
         cur = self._conn.cursor()
 
