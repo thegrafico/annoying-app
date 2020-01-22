@@ -24,6 +24,10 @@ KEY = Encrypt.read_key_from_file(file_path="./key.key")  # use default parameter
 # options when application startup
 login_options = " 1. Create Account\n 2. Login\n 3. Forgot password"
 project_options = " 1. Create Project\n 2. Show Projects\n 3. Select a Project\n 4. Remove project"
+working_in_project_options = " 1. Add user\n 2. Add Task\n 3. Assign Task\n 4. Remove user from Task\n" \
+                             " 5. Remove Task\n 6. Information\n 7. Select another project"
+
+# Error Message
 invalid_option_message = "Invalid option, Please try again. Type 0 to end the program"
 
 # ============================== END SETUP =====================================
@@ -156,7 +160,9 @@ def user_is_login(user: User):
     :param user: User Object
     :return : project id if a project was selected
     """
-    options = {"1": create_project, "2": show_projects_by_user, "3": select_project, "4": remove_project}
+    options = {"1": create_project, "2": show_projects_by_user, "3": select_project_by_id, "4": remove_project}
+
+    project_id: int = 0
 
     while True:
         print(project_options)
@@ -175,15 +181,33 @@ def user_is_login(user: User):
             project_id = options[user_input](user)
 
             if project_id > 0:
-                return project_id
-
-
+                break
         # Run the function
         options[user_input](user)
 
+    if project_id == 0:
+        return user_is_login(user)
+
+    work_in_project(user, project_id)
+
+
 # --
-def user_selected_a_project(user:User, project_id: int):
-    pass
+def work_in_project(user: User, project_id: int):
+    """
+    Start working in a project
+    :param user: user with the project to work in
+    :param project_id: id of the project to work in
+    :return : 
+    """
+    
+    if not len(user.projects) or project_id not in user.get_projects_id():
+        return 
+    
+    project = user.get_project_by_id(project_id)
+
+    while True:
+        print("\n============== WORKING IN PROJECT ==============\n {}".format(project.name))
+        print(working_in_project_options)
 
 
 # ========================================== PROJECTS FUNCTIONS ====================================
@@ -256,7 +280,7 @@ def get_projects_by_user_id(user_id: int) -> List[Project]:
 
 
 # --
-def select_project(user: User) -> int:
+def select_project_by_id(user: User) -> int:
     """
     Select a project for work
     :param user: user object to select the project
@@ -343,11 +367,8 @@ if __name__ == "__main__":
         print("Login failed, Try again or type 0 to end the program")
         user = user_is_not_login()
 
-    # Second step - User select a project to work in
-    project_id = user_is_login(user)
+    user_is_login(user)
 
-    if not project_id:
-        exit()
 
     # Third Step - user is working in a project
 

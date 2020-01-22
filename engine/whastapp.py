@@ -39,7 +39,7 @@ def send_message(number, message):
 
 if __name__ == "__main__": 
     init()
-    msg = ["Buenos dias mamasota", "Hola Ma, ahora me levante, voy a seguir durmiendo", "Durmiendo", "Bueeenaaaas"]
+    msg = ["Puto", "Putazo", "Putazo 3"]
     nran = random.randint(0, len(msg)-1)
     send_message("9392752555", msg[nran])
     
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
     while userInp != 0:
         nran = random.randint(0, len(msg)-1)
-        send_message("9392752555", msg[nran])
+        send_message("7875188867", msg[nran])
         userInp = int (input("press 0 to exit"))
         
         

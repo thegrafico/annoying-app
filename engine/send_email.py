@@ -41,5 +41,5 @@ def send_emails(emails: list, subject: str = "automated-BOT-remainder", text_mes
 
 
 if __name__ == "__main__":
-    emails_to_send = ["raul022107@gmail.com", "pichardoraul@gmail.com"]
+    emails_to_send = ["nairb1244@gmail.com", "pichardoraul@gmail.com"]
     send_emails(emails_to_send)
