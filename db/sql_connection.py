@@ -324,8 +324,13 @@ class SQLiteConnection:
             return True
         except:
             return False
-# -- End of class
 
+    def close_connection(self):
+        """Close the connection"""
+        self._conn.close()
+        self._conn = None
+
+# -- End of class
 
 if __name__ == '__main__':
 

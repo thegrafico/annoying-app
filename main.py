@@ -7,55 +7,15 @@ Description: main application
 from engine.user import User
 from engine.project import Project
 from engine.task import Task
-from db.sql_connection import SQLiteConnection as Sql
 import engine.send_email as Email
+from engine.helpers_functions import get_int
 import engine.encryption as Encrypt
-from engine.status import Status
+import engine.constans as constant
+from engine.constans import conn
+import engine.crud.user as user_crud
+import engine.crud.project as project_crud
+
 from typing import List
-
-# ============================== SETUP =====================================
-# Connect to the database
-conn = Sql("./pythonsqlite.db")
-conn.init_db()
-
-# key for encryption
-KEY = Encrypt.read_key_from_file(file_path="./key.key")  # use default parameter path
-
-# options when application startup
-login_options = " 1. Create Account\n 2. Login\n 3. Forgot password"
-project_options = " 1. Create Project\n 2. Show Projects\n 3. Select a Project\n 4. Remove project"
-working_in_project_options = " 1. Add user\n 2. Add Task\n 3. Assign Task\n 4. Remove user from Task\n" \
-                             " 5. Remove Task\n 6. Information\n 7. Select another project"
-
-# Error Message
-invalid_option_message = "Invalid option, Please try again. Type 0 to end the program"
-
-# ============================== END SETUP =====================================
-
-
-def create_user() -> bool:
-    """
-    Create a new user and insert into the Database
-    :returns: True if user was created
-    """
-
-    # TODO: verify len, number, lower and upper
-
-    name = input("Insert username: ")
-    password = Encrypt.encrypt_data(key=KEY, data=input("Insert Password: "))
-    email = input("Insert email: ")
-    number = input("Insert phone number: ")
-
-    # Creating user
-    new_user = User(name=name, email=email, number=number)
-
-    # Insert the user into the database
-    user_id = conn.create_user(user=new_user, password=password)
-
-    if user_id == -1:
-        return False
-
-    return True
 
 
 # --
@@ -90,7 +50,7 @@ def login(email: str, password: str, attempts: int = 3):
         return None
 
     # Decrypt user password to compare
-    decrypted_password = Encrypt.decrypt_data(key=KEY, data=user_data["password"])
+    decrypted_password = Encrypt.decrypt_data(key=constant.KEY, data=user_data["password"])
 
     counter = 1
 
@@ -119,6 +79,7 @@ def user_is_not_login():
     First prompt when user is not login
     :return: User object is user can login, otherwise None
     """
+
     options = {"1": "Create User", "2": "login", "3": "forgot_password"}
 
     while True:
@@ -126,18 +87,18 @@ def user_is_not_login():
 
             # message to the user
             print("\n==========================Options==============================")
-            print(login_options)
+            print(constant.login_options)
 
             # Prompt
             user_input = input("Insert Number Option: ")
 
             # if invalid input
             if user_input not in options.keys():
-                print(invalid_option_message)
+                print(constant.invalid_option_message)
                 continue
 
             if user_input == "1":
-                if create_user():
+                if user_crud.create_user(conn):
                     print("User created successfully")
                 else:
                     print("Error creating the user, please try again.")
@@ -158,125 +119,28 @@ def user_is_login(user: User):
     """
     Second Prompt - where user just login. Here the user select the project to work
     :param user: User Object
-    :return : project id if a project was selected
+    :return :
     """
-    options = {"1": create_project, "2": show_projects_by_user, "3": select_project_by_id, "4": remove_project}
+    options = {"1": project_crud.create_project, "2": project_crud.show_projects_by_user,
+               "3": select_project_by_id, "4": project_crud.remove_project}
 
     project_id: int = 0
 
     while True:
-        print(project_options)
+        print(constant.project_options)
 
         user_input = input("Select # Option: ")
 
         if user_input == "0":
-            return None
+            break
 
         # If the user_input is not in the dict, start again.
         if user_input not in options.keys():
-            print(invalid_option_message)
+            print(constant.invalid_option_message)
             continue
 
-        if user_input == "3":
-            project_id = options[user_input](user)
-
-            if project_id > 0:
-                break
         # Run the function
         options[user_input](user)
-
-    if project_id == 0:
-        return user_is_login(user)
-
-    work_in_project(user, project_id)
-
-
-# --
-def work_in_project(user: User, project_id: int):
-    """
-    Start working in a project
-    :param user: user with the project to work in
-    :param project_id: id of the project to work in
-    :return : 
-    """
-    
-    if not len(user.projects) or project_id not in user.get_projects_id():
-        return 
-    
-    project = user.get_project_by_id(project_id)
-
-    while True:
-        print("\n============== WORKING IN PROJECT ==============\n {}".format(project.name))
-        print(working_in_project_options)
-
-
-# ========================================== PROJECTS FUNCTIONS ====================================
-def create_project(user: User):
-    """Create a project for user"""
-    print("-- Creating a new Project --")
-
-    name = input("Insert Name: ")
-    description = input("Insert Description: ")
-
-    project_was_created = conn.create_project(name=name, description=description, user_id=user.user_id)
-
-    if project_was_created:
-        print("New project Added to the user!")
-        return
-
-    print("There was an error trying to create the project")
-
-
-# --
-def show_projects_by_user(user: User):
-    """
-    Print all the projects for a user
-    :param user: user object
-    :return all user projects:
-    """
-
-    projects = get_projects_by_user_id(user.user_id)
-
-    if not len(projects):
-        return
-
-    user.projects = projects
-
-    print("\n========================PROJECTS================================")
-    message = "ID: {}, Name: {}, Description: {}"
-
-    for project in projects:
-        print(message.format(project.project_id, project.name, project.description))
-    print("==================================================================\n")
-
-
-# --
-def get_projects_by_user_id(user_id: int) -> List[Project]:
-    """
-    Get all projects from user
-    :param user_id: id of the user
-    :returns: list of projects
-    """
-
-    if user.user_id < 1:
-        print("Invalid ID")
-        return []
-
-    projects = conn.get_projects_by_user_id(user_id=user_id)
-
-    if not len(projects):
-        print("\nYou don't have any project\n")
-        return []
-
-    # Create list of project
-    all_projects: List[Project] = []
-
-    # fill out the projects
-    for project in projects:
-        all_projects.append(Project(name=project["project_name"], project_id=project["id"],
-                                    description=project["description"], user_id=user_id,))
-
-    return all_projects
 
 
 # --
@@ -287,7 +151,7 @@ def select_project_by_id(user: User) -> int:
     :return : project_id
     """
 
-    user.projects = get_projects_by_user_id(user.user_id)
+    user.projects = project_crud.get_projects_by_user_id(user.user_id)
 
     if not len(user.projects):
         return 0
@@ -300,60 +164,12 @@ def select_project_by_id(user: User) -> int:
         user_input = get_int("Select the project id: ")
 
     project = user.get_project_by_id(user_input)
+
     print("===== PROJECT INFO =====")
     project.info()
 
-    return user_input
-
-
-# --
-def remove_project(user: User):
-    """
-    Remove a project for user
-    :param user: user with all projects
-    """
-
-    user.projects = get_projects_by_user_id(user.user_id)
-
-    if not len(user.projects):
-        return
-
-    msg = "Insert the project id to remove: "
-    user_input = get_int(msg)
-
-    # get all project ids
-    all_projects_id = user.get_projects_id()
-
-    while user_input not in all_projects_id:
-        print("invalid option, Try again. Type 0 for exit")
-        user_input = get_int(msg)
-
-        if user_input == 0:
-            return
-
-    # Remove project from db
-    project_was_removed = conn.remove_project_by_id(user_input)
-
-    if not project_was_removed:
-        print("Cannot remove the project")
-        return
-
-    user.remove_project(user_input)
-
-    print("Project is removed!")
+    project_crud.work_in_project(project)
 # ========================================================================================================
-
-
-def get_int(msg: str):
-    """Return an int"""
-
-    try:
-        user_input = int(input(msg))
-
-        return user_input
-    except Exception as e:
-        print("Invalid option, ", e)
-        return get_int(msg)
 
 
 # Test Running
@@ -369,6 +185,6 @@ if __name__ == "__main__":
 
     user_is_login(user)
 
-
+    conn.close_connection()
     # Third Step - user is working in a project
 
