@@ -98,7 +98,7 @@ def user_is_not_login():
                 continue
 
             if user_input == "1":
-                if user_crud.create_user(conn):
+                if user_crud.create_user():
                     print("User created successfully")
                 else:
                     print("Error creating the user, please try again.")
@@ -172,7 +172,7 @@ def select_project_by_id(user: User) -> int:
 # ========================================================================================================
 
 
-# Test Running
+# App Running
 if __name__ == "__main__":
 
     # First step

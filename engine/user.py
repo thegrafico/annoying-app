@@ -5,7 +5,7 @@ devpichardo@gmail.com
 User class to give projects
 """
 from engine.project import Project
-import engine.validation_for_project as Validation
+import engine.validation as Validation
 from engine.task import Task
 from typing import List
 

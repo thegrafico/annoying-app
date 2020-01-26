@@ -134,12 +134,64 @@ def work_in_project(project: Project):
     # working_in_project_options = " 1. Add user\n 2. Add Task\n 3. Assign Task\n 4. Remove user from Task\n" \
     #                              " 5. Remove Task\n 6. Information\n 7. Select another project"
 
-    # options = {"1": add_user_for_project, "2": add_task,
-    #            "3": set_task, "4": remove_user_from_task,
-    #            "5": remove_task, "6": task_info, "7": user_is_login}
+    options = {"1": add_user_for_project, "2": add_task,
+               "3": set_task, "4": remove_user_from_task,
+               "5": remove_task, "6": task_info, "7": None}
 
     while True:
         print("\n============== WORKING IN PROJECT ==============\n {}".format(project.name))
         print(constant.working_in_project_options)
 
-        user_input = helpers.get_int("Insert # option: ")
+        user_input = input("Insert # option: ")
+
+        if user_input not in options.keys():
+            print('\n--Invalid option, Try again --\n')
+            continue
+
+        # Exit from project
+        if user_input == "7":
+            break
+
+        # Run the functions
+        options[user_input]()
+
+
+# add user for project
+def add_user_for_project() -> bool:
+    """
+    Add a user in the project using the email of the user
+    :return :
+    """
+    email = input("Insert the email of the user: ")
+
+    if not len(email):
+        return False
+
+    email_was_added: bool = conn.add_user_to_project_by_email(email)
+
+    return email_was_added
+
+
+# Add task
+def add_task():
+    pass
+
+
+# set task
+def set_task():
+    pass
+
+
+# remove user from task
+def remove_user_from_task():
+    pass
+
+
+# remove task
+def remove_task():
+    pass
+
+
+# task info
+def task_info():
+    pass

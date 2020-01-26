@@ -6,6 +6,7 @@
 import sqlite3
 from sqlite3 import Error
 from engine.user import User
+import engine.validation as validation
 
 
 # Class
@@ -313,7 +314,7 @@ class SQLiteConnection:
     def add_user_to_project(self, user_id: int, project_id: int) -> bool:
         """ Add an user to a new project"""
         
-        #TODO: verify is user not in project firts
+        # TODO: verify is user not in project firts
         
         query = "INSERT INTO PROJECT_USER VALUES(?, ?)"
         
@@ -325,12 +326,52 @@ class SQLiteConnection:
         except:
             return False
 
+    # add user to project using email
+    def add_user_to_project_by_email(self, email: str, project_id: int) -> bool:
+        """
+        add a user to a project using the email
+        :param email: email of the user. must have a record
+        :param project_id: id of the project to add
+        :return: True if user was added
+        """
+        user_id = self.get_user_id_by_email(email)
+
+        if not user_id:
+            return False
+
+        return self.add_user_to_project(user_id, project_id)
+
+    # Get id of the user by email
+    def get_user_id_by_email(self, email: str) -> int:
+        """
+        get id of the user by email
+        """
+        if not len(email) or not validation.validate_email(email):
+            print("Invalid email")
+            return 0
+
+        query = "SELECT id FROM USER WHERE email = ?"
+
+        cur = self._conn.cursor()
+
+        cur.execute(query, [email])
+
+        user_id = cur.fetchone()
+
+        if not user_id:
+            print("User id not found")
+            return 0
+
+        return user_id
+
+    # Close connection
     def close_connection(self):
         """Close the connection"""
         self._conn.close()
         self._conn = None
 
 # -- End of class
+
 
 if __name__ == '__main__':
 
